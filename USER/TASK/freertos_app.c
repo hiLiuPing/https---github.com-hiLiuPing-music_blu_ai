@@ -49,7 +49,7 @@ log_init(&huart2);
   {
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     log_printf("LedBlinkTask");
-    vTaskDelay(pdMS_TO_TICKS(500));
+    vTaskDelay(pdMS_TO_TICKS(1000));
     log_printf("aaaa");
   }
 }
