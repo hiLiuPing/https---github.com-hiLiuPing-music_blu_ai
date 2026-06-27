@@ -221,6 +221,9 @@ int spi_flash_init(spi_flash_t *f,
 
         switch (dev)
         {
+            case 0x15: // W25Q16JV 2MB
+            f->flash_size = 2U * 1024U * 1024U;
+            break;
         case 0x17:  // 8M
             f->flash_size = 8 * 1024 * 1024;
             break;

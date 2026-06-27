@@ -44,7 +44,7 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
 static void LedBlinkTask(void *argument)
 {
   (void)argument;
-log_init(&huart3);
+log_init(&huart2);
   for (;;)
   {
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
