@@ -270,7 +270,7 @@ static void prvTaskExitError( void )
 }
 /*-----------------------------------------------------------*/
 
-void vPortSVCHandler( void )
+__attribute__((naked)) void SVC_Handler( void )
 {
 	__asm volatile (
 					"	ldr	r3, pxCurrentTCBConst2		\n" /* Restore the context. */
@@ -289,7 +289,7 @@ void vPortSVCHandler( void )
 }
 /*-----------------------------------------------------------*/
 
-static void prvPortStartFirstTask( void )
+__attribute__((naked)) static void prvPortStartFirstTask( void )
 {
 	__asm volatile(
 					" ldr r0, =0xE000ED08 	\n" /* Use the NVIC offset register to locate the stack. */
@@ -432,7 +432,7 @@ void vPortExitCritical( void )
 }
 /*-----------------------------------------------------------*/
 
-void xPortPendSVHandler( void )
+__attribute__((naked)) void PendSV_Handler( void )
 {
 	/* This is a naked function. */
 
@@ -490,7 +490,7 @@ void xPortPendSVHandler( void )
 }
 /*-----------------------------------------------------------*/
 
-void xPortSysTickHandler( void )
+void SysTick_Handler( void )
 {
 	/* The SysTick runs at the lowest interrupt priority, so when this interrupt
 	executes all interrupts must be unmasked.  There is therefore no need to
@@ -686,7 +686,7 @@ __attribute__(( weak )) void vPortSetupTimerInterrupt( void )
 /*-----------------------------------------------------------*/
 
 /* This is a naked function. */
-static void vPortEnableVFP( void )
+__attribute__((naked)) static void vPortEnableVFP( void )
 {
 	__asm volatile
 	(

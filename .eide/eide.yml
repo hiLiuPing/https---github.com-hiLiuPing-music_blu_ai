@@ -31,6 +31,17 @@ virtualFolder:
                 - path: Core/Src/stm32l4xx_hal_msp.c
                 - path: Core/Src/stm32l4xx_hal_timebase_tim.c
               folders: []
+            - name: FreeRTOS
+              files:
+                - path: USER/Middle/FreeRTOS/Source/tasks.c
+                - path: USER/Middle/FreeRTOS/Source/list.c
+                - path: USER/Middle/FreeRTOS/Source/queue.c
+                - path: USER/Middle/FreeRTOS/Source/timers.c
+                - path: USER/Middle/FreeRTOS/Source/event_groups.c
+                - path: USER/Middle/FreeRTOS/Source/croutine.c
+                - path: USER/Middle/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c
+                - path: USER/Middle/FreeRTOS/Source/portable/MemMang/heap_4.c
+              folders: []
     - name: Drivers
       files: []
       folders:
@@ -94,6 +105,7 @@ targets:
         - USER/BSP/FLASH
         - USER/Middle/LittleFS
         - USER/Middle/lwrb
+        - USER/TASK
       libList: []
     excludeList: []
     settings:
@@ -217,4 +229,14 @@ targets:
         otherCmds: ""
         proType: 1
         speed: 8000
-    uploader: JLink
+      STLink:
+        address: "0x8000000"
+        bin: ""
+        elFile: None
+        optionBytes: .eide/music_blu_ai.st.option.bytes.ini
+        otherCmds: ""
+        proType: SWD
+        resetMode: default
+        runAfterProgram: true
+        speed: 4000
+    uploader: STLink

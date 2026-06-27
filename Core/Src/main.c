@@ -26,7 +26,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "freertos_app.h"
+#include "FreeRTOS.h"
+#include "task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -96,7 +98,8 @@ int main(void)
   MX_QUADSPI_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-
+  MX_FREERTOS_Init();
+  vTaskStartScheduler();
   /* USER CODE END 2 */
 
   /* Infinite loop */

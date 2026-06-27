@@ -42,7 +42,7 @@ void log_printf_impl(const char *file,
                      const char *fmt, ...)
 {
 #if LOG_ENABLE
-    char buf[128];
+    char buf[64];
     uint16_t len = 0;
     va_list args;
 

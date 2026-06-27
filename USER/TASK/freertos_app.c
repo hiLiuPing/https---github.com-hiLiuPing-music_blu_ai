@@ -4,10 +4,11 @@
 #include "task.h"
 #include "main.h"
 #include "log.h"
+#include "usart.h"
 static void LedBlinkTask(void *argument);
 static void FaultBlinkLoop(volatile uint32_t delay_cycles);
 
-#define LED_BLINK_TASK_STACK_SIZE 1024U
+#define LED_BLINK_TASK_STACK_SIZE 128U
 
 void MX_FREERTOS_Init(void)
 {
@@ -25,7 +26,7 @@ void MX_FREERTOS_Init(void)
 void vApplicationMallocFailedHook(void)
 {
   taskDISABLE_INTERRUPTS();
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+  // HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
   for (;;)
   {
   }
@@ -37,18 +38,19 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
   (void)pcTaskName;
 
   taskDISABLE_INTERRUPTS();
-  FaultBlinkLoop(200000U);
+  // FaultBlinkLoop(200000U);
 }
 
 static void LedBlinkTask(void *argument)
 {
   (void)argument;
-
+log_init(&huart3);
   for (;;)
   {
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-    log_printf("LedBlinkTask\r\n");
+    log_printf("LedBlinkTask");
     vTaskDelay(pdMS_TO_TICKS(500));
+    log_printf("aaaa");
   }
 }
 
