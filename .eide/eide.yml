@@ -1,0 +1,220 @@
+version: "4.1"
+name: music_blu_ai
+type: ARM
+deviceName: null
+packDir: null
+srcDirs:
+  - USER
+virtualFolder:
+  name: <virtual_root>
+  files: []
+  folders:
+    - name: Application
+      files: []
+      folders:
+        - name: MDK-ARM
+          files:
+            - path: MDK-ARM/startup_stm32l431xx.s
+          folders: []
+        - name: User
+          files: []
+          folders:
+            - name: Core
+              files:
+                - path: Core/Src/main.c
+                - path: Core/Src/gpio.c
+                - path: Core/Src/i2c.c
+                - path: Core/Src/quadspi.c
+                - path: Core/Src/spi.c
+                - path: Core/Src/usart.c
+                - path: Core/Src/stm32l4xx_it.c
+                - path: Core/Src/stm32l4xx_hal_msp.c
+                - path: Core/Src/stm32l4xx_hal_timebase_tim.c
+              folders: []
+    - name: Drivers
+      files: []
+      folders:
+        - name: STM32L4xx_HAL_Driver
+          files:
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim_ex.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c_ex.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rcc.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rcc_ex.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ex.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma_ex.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pwr.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pwr_ex.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_cortex.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_exti.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_qspi.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi_ex.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart_ex.c
+          folders: []
+        - name: CMSIS
+          files:
+            - path: Core/Src/system_stm32l4xx.c
+          folders: []
+    - name: ::CMSIS
+      files: []
+      folders: []
+dependenceList: []
+outDir: build
+miscInfo:
+  uid: 5adea23c67b3dd8b3cad843c7905f5f5
+targets:
+  music_blu_ai:
+    cppPreprocessAttrs:
+      defineList:
+        - USE_HAL_DRIVER
+        - STM32L431xx
+        - HAL_RTOS_ENABLED=1
+        - __VFP_FP__
+        - LFS_NO_ASSERT
+        - __ARMCC_VERSION
+      incList:
+        - Core/Inc
+        - Drivers/STM32L4xx_HAL_Driver/Inc
+        - Drivers/STM32L4xx_HAL_Driver/Inc/Legacy
+        - Drivers/CMSIS/Device/ST/STM32L4xx/Include
+        - Drivers/CMSIS/Include
+        - .cmsis/include
+        - MDK-ARM/RTE/_music_blu_ai
+        - USER/Middle/FreeRTOS/Source/include
+        - USER/Middle/FreeRTOS/Source/portable/GCC/ARM_CM4F
+        - USER/BSP/LOG
+        - USER/BSP/FLASH
+        - USER/Middle/LittleFS
+        - USER/Middle/lwrb
+      libList: []
+    excludeList: []
+    settings:
+      debugger: cortex-debug
+    toolchain: AC6
+    toolchainConfigMap:
+      AC6:
+        archExtensions: ""
+        cpuType: Cortex-M4
+        floatingPointHardware: single
+        options:
+          version: 3
+          afterBuildTasks: []
+          asm-compiler:
+            $use: asm-auto
+            defines: []
+            misc-controls: ""
+          beforeBuildTasks: []
+          c/cpp-compiler:
+            CXX_FLAGS: -Wno-unused-parameter -Wno-error=unused-variable -Wno-macro-redefined -Wno-pointer-sign
+            C_FLAGS: -Wno-unused-parameter -Wno-error=unused-variable -Wno-macro-redefined -Wno-pointer-sign
+            language-c: c11
+            language-cpp: c++11
+            link-time-optimization: false
+            one-elf-section-per-function: true
+            optimization: level-1
+            warnings: ac5-like-warnings
+          global:
+            output-debug-info: enable
+            use-microLIB: true
+          linker:
+            $outputTaskExcludes:
+              - .bin
+            misc-controls: --diag_suppress=L6329
+            output-format: elf
+            ro-base: ""
+            rw-base: ""
+            xo-base: ""
+        scatterFilePath: ""
+        storageLayout:
+          RAM:
+            - id: 1
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 3
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 1
+              isChecked: true
+              mem:
+                size: "0xc000"
+                startAddr: "0x20000000"
+              noInit: false
+              tag: IRAM
+            - id: 2
+              isChecked: true
+              mem:
+                size: "0x4000"
+                startAddr: "0x10000000"
+              noInit: false
+              tag: IRAM
+          ROM:
+            - id: 1
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 3
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 1
+              isChecked: true
+              isStartup: true
+              mem:
+                size: "0x40000"
+                startAddr: "0x8000000"
+              tag: IROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: IROM
+        useCustomScatterFile: false
+    uploadConfigMap:
+      JLink:
+        baseAddr: ""
+        bin: ""
+        cpuInfo:
+          cpuName: "null"
+          vendor: "null"
+        otherCmds: ""
+        proType: 1
+        speed: 8000
+    uploader: JLink
