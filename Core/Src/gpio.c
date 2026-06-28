@@ -84,15 +84,15 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : BAT_CHG_Pin */
   GPIO_InitStruct.Pin = BAT_CHG_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(BAT_CHG_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : POWER_IN_5V_Pin MUSIC_ON_Pin */
-  GPIO_InitStruct.Pin = POWER_IN_5V_Pin|MUSIC_ON_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  /*Configure GPIO pin : POWER_IN_5V_Pin */
+  GPIO_InitStruct.Pin = POWER_IN_5V_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(POWER_IN_5V_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : AD_PWER_EN_Pin */
   GPIO_InitStruct.Pin = AD_PWER_EN_Pin;
@@ -107,6 +107,12 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(SPI1_CS_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : MUSIC_ON_Pin */
+  GPIO_InitStruct.Pin = MUSIC_ON_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(MUSIC_ON_GPIO_Port, &GPIO_InitStruct);
 
 }
 

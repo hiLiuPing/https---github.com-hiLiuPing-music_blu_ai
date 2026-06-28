@@ -115,6 +115,7 @@ targets:
         - USER/BSP
         - USER
         - USER/GUI
+        - USER/BSP/MAX17048
       libList: []
     excludeList: []
     settings:

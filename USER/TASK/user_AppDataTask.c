@@ -85,6 +85,8 @@ void AppDataTask(void *argument)
         if ((now - last_1s_tick) >= ms_1000)
         {
             last_1s_tick += ms_1000;
+            Update_Env(&g_sensors_environment);
+            Update_Battery(&g_sensors_battery);
 
             if (g_ui.oled_showing != 0U)
             {

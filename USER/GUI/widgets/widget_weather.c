@@ -1,7 +1,38 @@
 #include "../ui_widget.h"
 #include "../icons.h"
+#include "sensors_app.h"
 
 #define UI_WIDGET_WEATHER_FRAME_MS  120U
+
+static int UI_Widget_RoundFloatToInt(float value)
+{
+    return (value >= 0.0f) ? (int)(value + 0.5f) : (int)(value - 0.5f);
+}
+
+static int UI_Widget_LocalHumidityPercent(void)
+{
+    int hum = UI_Widget_RoundFloatToInt(g_sensors_environment.hum);
+
+    if (hum < 0)
+    {
+        hum = 0;
+    }
+    else if (hum > 100)
+    {
+        hum = 100;
+    }
+
+    return hum;
+}
+
+static void UI_Widget_FormatTempTenths(char *buf, uint8_t size, float value)
+{
+    memset(buf, 0, size); // 函数内强制清空缓冲区
+    int tenths = (value >= 0.0f) ? (int)(value * 10.0f + 0.5f) : (int)(value * 10.0f - 0.5f);
+    int abs_tenths = (tenths < 0) ? -tenths : tenths;
+
+    snprintf(buf, size, "%s%d.%dC", (tenths < 0) ? "-" : "", abs_tenths / 10, abs_tenths % 10);
+}
 
 typedef enum {
     UI_WEATHER_ICON_UNKNOWN = 0U,
@@ -877,7 +908,7 @@ void UI_Widget_DrawRegionTempNow(u8g2_t *u8g2, int16_t x, int16_t y, uint8_t w, 
     (void)h;
 
     u8g2_SetFont(u8g2, u8g2_font_5x8_tf);
-    snprintf(buf, sizeof(buf), "%d°C", g_now_weather.temp);
+    snprintf(buf, sizeof(buf), "%dC", UI_Widget_RoundFloatToInt(g_sensors_environment.temp));
     UI_Widget_DrawCenteredStr(u8g2, x, y + 10, w, "TEMP");
     UI_Widget_DrawCenteredWeatherStr(u8g2, x, y + 27, w, buf);
 }
@@ -946,7 +977,7 @@ void UI_Widget_DrawRegionHumidityNow(u8g2_t *u8g2, int16_t x, int16_t y, uint8_t
     (void)h;
     u8g2_SetFont(u8g2, u8g2_font_5x8_tf);
     UI_Widget_DrawCenteredStr(u8g2, x, y + 10, w, "HUM");
-    snprintf(buf, sizeof(buf), "%d%%", g_now_weather.humidity);
+    snprintf(buf, sizeof(buf), "%d%%", UI_Widget_LocalHumidityPercent());
     UI_Widget_DrawCenteredWeatherStr(u8g2, x, y + 27, 32, buf);
 }
 
@@ -997,16 +1028,20 @@ void UI_Widget_DrawRegionTempHumid(u8g2_t *u8g2, int16_t x, int16_t y, uint8_t w
 
 void UI_Widget_DrawRegionTempHumidSmall(u8g2_t *u8g2, int16_t x, int16_t y, uint8_t w, uint8_t h)
 {
-    char buf[8];
+    char buf[12];
     (void)h;
 
     u8g2_SetFont(u8g2, u8g2_font_5x8_tf);
-    UI_Widget_DrawCenteredStr(u8g2, x, y + 7, w, "TMP");
-    snprintf(buf, sizeof(buf), "%d°C", g_now_weather.temp);
-    UI_Widget_DrawCenteredStr(u8g2, x, y + 16, w, buf);
-    UI_Widget_DrawCenteredStr(u8g2, x, y + 23, w, "HUM");
-    snprintf(buf, sizeof(buf), "%d%%", g_now_weather.humidity);
-    UI_Widget_DrawCenteredStr(u8g2, x, y + 30, w, buf);
+
+    // ========== 温度显示 ==========
+    memset(buf, 0, sizeof(buf)); // 清空缓冲区
+    UI_Widget_FormatTempTenths(buf, sizeof(buf), g_sensors_environment.temp);
+    UI_Widget_DrawCenteredStr(u8g2, x, y + 14, w, buf);
+
+    // ========== 湿度显示 ==========
+    memset(buf, 0, sizeof(buf)); // 再次清空，避免温度字符串残留干扰湿度
+    snprintf(buf, sizeof(buf), "%d%%", UI_Widget_LocalHumidityPercent());
+    UI_Widget_DrawCenteredStr(u8g2, x, y + 28, w, buf);
 }
 
 /**

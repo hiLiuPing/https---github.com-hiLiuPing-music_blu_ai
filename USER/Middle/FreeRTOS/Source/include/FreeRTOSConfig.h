@@ -22,7 +22,8 @@
 
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
-#define configUSE_TICKLESS_IDLE                 0
+#define configUSE_TICKLESS_IDLE                 1
+#define configEXPECTED_IDLE_TIME_BEFORE_SLEEP   20
 #define configCPU_CLOCK_HZ                      ( SystemCoreClock )
 #define configTICK_RATE_HZ                      ( ( TickType_t ) 1000 )
 #define configMAX_PRIORITIES                    32
@@ -101,5 +102,12 @@
 #define INCLUDE_xTaskAbortDelay                 1
 #define INCLUDE_xTaskGetHandle                  1
 #define INCLUDE_xTaskResumeFromISR              1
+
+
+void My_PreSleep_Function(uint32_t *x);
+void My_PostSleep_Function(uint32_t x);
+
+#define configPRE_SLEEP_PROCESSING(x)   My_PreSleep_Function(&(x))
+#define configPOST_SLEEP_PROCESSING(x)  My_PostSleep_Function(x)
 
 #endif /* FREERTOS_CONFIG_H */

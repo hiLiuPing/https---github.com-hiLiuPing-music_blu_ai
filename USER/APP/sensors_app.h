@@ -8,7 +8,8 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
-
+#include "sht40_reg.h"
+#include "max17048_reg.h"
 #include "i2c_bus.h"
 #include "lis3dh_reg.h"
 
@@ -27,7 +28,32 @@ typedef struct
     lis3dh_ctx_t ctx;
 } motion_module_t;
 
+/* MAX17048 */
+typedef struct
+{
+    float soc;
+
+    float voltage;
+
+    max17048_ctx_t ctx;
+
+} battery_module_t;
+
+/* SHT40 */
+typedef struct
+{
+    float temp;
+
+    float hum;
+
+    sht40_ctx_t ctx;
+
+} env_module_t;
+
 extern motion_module_t g_sensors_motion;
+extern battery_module_t g_sensors_battery;
+extern env_module_t g_sensors_environment;
+
 extern I2C_Bus_t i2c_bus_1;
 extern I2C_Bus_t i2c_bus_2;
 
@@ -35,6 +61,9 @@ int32_t APP_Sensors_Init(void);
 int32_t APP_Sensors_Update(void);
 void Motion_SwapBuffer(motion_module_t *m);
 void Update_Motion(motion_module_t *m);
+
+void Update_Env(env_module_t *m);
+void Update_Battery(battery_module_t *m);
 
 #ifdef __cplusplus
 }

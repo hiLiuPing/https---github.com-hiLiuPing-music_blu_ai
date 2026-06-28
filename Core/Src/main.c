@@ -108,6 +108,20 @@ static void Sleep_EnableRunIrqs(void)
   // HAL_NVIC_EnableIRQ(TIM7_IRQn);
 }
 
+static uint32_t Sleep_ProcessPendingLptimWake(void)
+{
+  if (__HAL_LPTIM_GET_FLAG(&hlptim1, LPTIM_FLAG_ARRM) != RESET)
+  {
+    __HAL_LPTIM_CLEAR_FLAG(&hlptim1, LPTIM_FLAG_ARRM);
+    EXTI->PR2 = LPTIM_EXTI_LINE_LPTIM1;
+    NVIC_ClearPendingIRQ(LPTIM1_IRQn);
+    LPTIM_OnTick();
+    return 1U;
+  }
+
+  return 0U;
+}
+
 static void WakeRuntimeTasks(uint8_t wake_display)
 {
   g_ui.sys_running = 1U;
@@ -122,8 +136,6 @@ static void WakeRuntimeTasks(uint8_t wake_display)
     xSemaphoreGive(xTransmitTaskWakeSemaphore);
   if (xAppDataTaskWakeSemaphore != NULL)
     xSemaphoreGive(xAppDataTaskWakeSemaphore);
-  if (xWeatherSyncTaskWakeSemaphore != NULL)
-    xSemaphoreGive(xWeatherSyncTaskWakeSemaphore);
 
   if (wake_display)
   {
@@ -256,12 +268,17 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 
+  /** Configure LSE Drive Capability
+  */
+  HAL_PWR_EnableBkUpAccess();
+  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
+
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 1;
@@ -391,17 +408,19 @@ void My_PostSleep_Function(uint32_t x)
     {
         uint32_t is_key_wake = (EXTI->PR1 & SW_Pin) != 0U;
         uint32_t is_power_wake = (EXTI->PR1 & (BAT_CHG_Pin | POWER_IN_5V_Pin)) != 0U;
-        uint32_t is_lptim_wake = (EXTI->PR2 & LPTIM_EXTI_LINE_LPTIM1) != 0U;
-        uint32_t is_quote_wake = g_quote_ready ? 1U : 0U;
-        uint32_t is_timeout_wake = (g_key_idle_timeout || g_io1_timeout || g_io2_timeout) ? 1U : 0U;
-        uint32_t has_lptim_event = (is_quote_wake || is_timeout_wake) ? 1U : 0U;
-
+        uint32_t is_lptim_wake = ((EXTI->PR2 & LPTIM_EXTI_LINE_LPTIM1) != 0U) ||
+                                 (__HAL_LPTIM_GET_FLAG(&hlptim1, LPTIM_FLAG_ARRM) != RESET);
         SystemClock_STOPResume();
 
         HAL_NVIC_DisableIRQ(EXTI2_IRQn);
         NVIC_ClearPendingIRQ(EXTI2_IRQn);
-        EXTI->PR2 = LPTIM_EXTI_LINE_LPTIM1;
-        NVIC_ClearPendingIRQ(LPTIM1_IRQn);
+
+        if (is_lptim_wake)
+        {
+            is_lptim_wake = Sleep_ProcessPendingLptimWake();
+        }
+
+        uint32_t has_lptim_event = (g_quote_ready || g_key_idle_timeout || g_io1_timeout || g_io2_timeout) ? 1U : 0U;
 
         HAL_ResumeTick();
         Sleep_EnableRunIrqs();

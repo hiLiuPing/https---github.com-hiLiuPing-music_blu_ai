@@ -57,7 +57,7 @@ void KeyManllegeTask(void *pvParameters)
                     {
                         (void)OLED_UI_PostStateEvent(UI_EVT_SHOW_ON, "KeyMgr");
                     }
-                    Weather_FillDemoData();
+                    // Weather_FillDemoData();
                     if (g_music_ble_state.music_ble_power == 0)
                     {
                         /* code */
