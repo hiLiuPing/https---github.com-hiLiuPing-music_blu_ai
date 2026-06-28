@@ -26,7 +26,7 @@ static uint8_t Weather_RunSyncWithRetry(const char *success_log,
 {
     uint8_t retry;
 
-    for (retry = 0U; retry < 15U; retry++)
+    for (retry = 0U; retry < 10U; retry++)
     {
         if (!g_ui.sys_running)
         {
@@ -85,6 +85,7 @@ void WeatherSyncTask(void *arg)
                     g_weather_module.first_sync_done = 1U;
                 }
             }
+            g_weather_module.first_sync_done = 1U;
 
             continue;
         }

@@ -33,6 +33,7 @@ extern "C" {
 /* USER CODE END Includes */
 
 extern SAI_HandleTypeDef hsai_BlockA1;
+extern DMA_HandleTypeDef hdma_sai1_a;
 
 /* USER CODE BEGIN Private defines */
 

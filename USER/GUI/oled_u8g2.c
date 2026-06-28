@@ -175,7 +175,7 @@ static uint8_t OLED_DmaWaitIdle(TickType_t timeout_ticks)
             return 0U;
         }
 
-        vTaskDelay(pdMS_TO_TICKS(1));
+        taskYIELD();
     }
 
     return 1U;
@@ -208,7 +208,7 @@ static uint8_t OLED_DmaWaitPendingConsumed(uint8_t idx, TickType_t timeout_ticks
             return 0U;
         }
 
-        vTaskDelay(pdMS_TO_TICKS(1));
+        taskYIELD();
     }
 
     return 1U;

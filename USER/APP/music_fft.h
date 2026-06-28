@@ -19,9 +19,6 @@ void MusicFFT_Process(void);
 void MusicFFT_GetBars(uint8_t *bars, uint8_t count);
 uint8_t MusicFFT_HasSignal(void);
 
-void MusicFFT_OnDmaHalf(void);
-void MusicFFT_OnDmaFull(void);
-
 #ifdef __cplusplus
 }
 #endif
