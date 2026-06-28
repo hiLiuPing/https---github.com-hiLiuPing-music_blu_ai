@@ -69,8 +69,8 @@ typedef enum {
     UI_EVT_SYS_STOP,
     UI_EVT_WEATHER_TIME_SYNC,
     UI_EVT_KEY_TIMEOUT,
-    UI_EVT_IO1_TIMEOUT,
-    UI_EVT_IO2_TIMEOUT,
+    UI_EVT_BULU_TIMEOUT,
+    UI_EVT_MUSIC_TIMEOUT,
 } UI_Event_t;
 
 typedef struct {

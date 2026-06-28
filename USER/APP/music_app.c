@@ -29,7 +29,7 @@ void music_send_cmd(MusicCtrlCmd cmd)
 {
     if (music_cmd_queue != NULL)
     {
-        xQueueSend(music_cmd_queue, &cmd, 0);
+        xQueueSend(music_cmd_queue, &cmd, portMAX_DELAY);
     }
 }
 
@@ -138,8 +138,8 @@ void Music_PowerOn(void)
 
     HAL_GPIO_WritePin(AD_PWER_EN_GPIO_Port, AD_PWER_EN_Pin, GPIO_PIN_SET);
     vTaskDelay(pdMS_TO_TICKS(50));
-    
     HAL_GPIO_WritePin(BULU_PWR_EN_GPIO_Port, BULU_PWR_EN_Pin, GPIO_PIN_SET);
+    g_music_ble_state.music_ble_power = 1;
 }
 
 /**
@@ -151,6 +151,7 @@ void Music_PowerOff(void)
     HAL_GPIO_WritePin(BULU_PWR_EN_GPIO_Port, BULU_PWR_EN_Pin, GPIO_PIN_RESET);
     vTaskDelay(pdMS_TO_TICKS(50));
     HAL_GPIO_WritePin(AD_PWER_EN_GPIO_Port, AD_PWER_EN_Pin, GPIO_PIN_RESET);
+    g_music_ble_state.music_ble_power = 0;
 }
 
 /**

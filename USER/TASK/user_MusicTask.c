@@ -58,6 +58,9 @@ void MusicTask(void *pvParameters)
             case CMD_VOL_DOWN:
                 Music_VolumeDown();
                 break;
+            case CMD_SYSTEM_POWER_OFF:
+                System_PowerOff();
+                break;
             default:
                 break;
             }

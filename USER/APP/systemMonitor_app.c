@@ -38,10 +38,10 @@ static const char *OLED_UI_EventName(UI_Event_t evt)
         return "WEATHER_SYNC";
     case UI_EVT_KEY_TIMEOUT:
         return "KEY_TIMEOUT";
-    case UI_EVT_IO1_TIMEOUT:
-        return "IO1_TIMEOUT";
-    case UI_EVT_IO2_TIMEOUT:
-        return "IO2_TIMEOUT";
+    case UI_EVT_BULU_TIMEOUT:
+        return "BULU_TIMEOUT";
+    case UI_EVT_MUSIC_TIMEOUT:
+        return "MUSIC_TIMEOUT";
     default:
         return "UI_EVT";
     }

@@ -94,11 +94,11 @@ void UI_Msg_HandleEvent(UI_Event_t event)
     case UI_EVT_KEY_TIMEOUT:
         UI_Popup_Show(Draw_SystemMsgPopup, "KEY TIMEOUT", 500);
         break;
-    case UI_EVT_IO1_TIMEOUT:
-        UI_Popup_Show(Draw_SystemMsgPopup, "IO1 TIMEOUT", 500);
+    case UI_EVT_BULU_TIMEOUT:
+        UI_Popup_Show(Draw_SystemMsgPopup, "BULU TIMEOUT", 500);
         break;
-    case UI_EVT_IO2_TIMEOUT:
-        UI_Popup_Show(Draw_SystemMsgPopup, "IO2 TIMEOUT", 500);
+    case UI_EVT_MUSIC_TIMEOUT:
+        UI_Popup_Show(Draw_SystemMsgPopup, "MUSIC TIMEOUT", 500);
         break;
     case UI_EVT_SHOW_ON:
         RTC_ReadToBuffer();

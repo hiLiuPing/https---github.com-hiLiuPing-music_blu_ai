@@ -23,7 +23,7 @@ typedef enum
     CMD_POWER_OFF,  /* 关机 */
     CMD_VOL_UP,     /* 音量+ */
     CMD_VOL_DOWN,    /* 音量- */
-
+    CMD_SYSTEM_POWER_OFF, /* 系统关机 */
 } MusicCtrlCmd;
 
 /* 模拟按键所需的 GPIO 描述。 */

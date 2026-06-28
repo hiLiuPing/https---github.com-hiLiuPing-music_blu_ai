@@ -62,9 +62,16 @@ void KeyManllegeTask(void *pvParameters)
                     {
                         /* code */
                         music_send_cmd(CMD_POWER_ON);
-                        g_music_ble_state.music_ble_power = 1;
+                        
                     }
                     
+
+                //    if (WeatherSyncTaskHandle != NULL)
+                //     {
+                //         xTaskNotifyGive(WeatherSyncTaskHandle);
+                //     } 
+
+
                     // Music_PowerOn();
                     log_printf("Key %d Clicked!\n", key_event.id);
                 }
@@ -112,7 +119,7 @@ void KeyManllegeTask(void *pvParameters)
                 case MSG_BLUETOOTH_CONNECT:
                     g_music_ble_state.ble_connected = 1;
                     g_music_ble_state.ble_ever_connected = 1;
-                    LPTIM_StopIO1();
+                    LPTIM_Bulu_Connect();
                     SEND_UI_EVT(UI_EVT_BLUETOOTH_CONNECTED);
                     LED_Update();
                     break;
@@ -121,7 +128,7 @@ void KeyManllegeTask(void *pvParameters)
                     g_music_ble_state.ble_connected = 0;
                     if (g_music_ble_state.ble_ever_connected)
                     {
-                        LPTIM_StartIO1(180U);
+                        LPTIM_Bulu_Disonnect(300U);
                     }
                     LED_Update();
                     break;
@@ -134,7 +141,7 @@ void KeyManllegeTask(void *pvParameters)
                     }
                     g_music_ble_state.music_played = 1;
                     g_music_ble_state.music_ever_played = 1;
-                    LPTIM_StopIO2();
+                    LPTIM_Music_Play();
                     LED_Update();
                     break;
 
@@ -147,7 +154,7 @@ void KeyManllegeTask(void *pvParameters)
                     g_music_ble_state.music_played = 0;
                     if (g_music_ble_state.music_ever_played)
                     {
-                        LPTIM_StartIO2(300U);
+                        LPTIM_Music_Stop(180U);
                     }
                     LED_Update();
                     break;
@@ -209,6 +216,13 @@ void KeyManllegeTask(void *pvParameters)
                     break;
 
                 case MSG_TILT_SHAKE_HORIZONTAL:
+
+                    if (WeatherSyncTaskHandle != NULL)
+                    {
+                        xTaskNotifyGive(WeatherSyncTaskHandle);
+                    }
+                    SEND_UI_EVT(UI_EVT_WEATHER_TIME_SYNC);
+
                     log_printf("Tilt horizontal shake detected.\r\n");
                     break;
 

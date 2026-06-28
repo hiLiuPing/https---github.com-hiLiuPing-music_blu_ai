@@ -57,7 +57,7 @@ void KeyTask(void *argument)
                 if (key != MSG_TILT_NONE)
                 {
                     xQueueSend(Key_Music_queue, &key, portMAX_DELAY);
-                    tilt_enable_timer = 500;
+                    tilt_enable_timer = 3000;
                     log_printf("Tilt Key Detected: %d\r\n", key);
                 }
                 tilt_enable_timer--;

@@ -584,7 +584,8 @@ static void UI_Nav_UpdateShutdown(void)
         g_ui_shutdown.progress = 100U;
         g_ui_shutdown.display_progress = 100U;
         g_ui_shutdown.committed = 1U;
-        System_PowerOff();
+        // System_PowerOff();
+        music_send_cmd(CMD_SYSTEM_POWER_OFF);
         return;
     }
 

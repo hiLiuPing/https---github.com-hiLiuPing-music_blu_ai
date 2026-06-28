@@ -115,8 +115,8 @@ void HAL_LPTIM_MspDeInit(LPTIM_HandleTypeDef* lptimHandle)
 #define KEY_IDLE_TIMEOUT_S      10800U
 
 volatile uint8_t g_key_idle_timeout = 0;
-volatile uint8_t g_io1_timeout = 0;
-volatile uint8_t g_io2_timeout = 0;
+volatile uint8_t g_bulu_timeout = 0;
+volatile uint8_t g_music_timeout = 0;
 volatile uint8_t g_quote_ready = 0;
 
 typedef struct {
@@ -128,8 +128,8 @@ typedef struct {
 typedef struct {
     SoftTimer_t quote;
     SoftTimer_t key_idle;
-    SoftTimer_t io1;
-    SoftTimer_t io2;
+    SoftTimer_t bulu;
+    SoftTimer_t music;
     uint32_t quote_interval;
 } LPTIM1_SoftTimer_t;
 
@@ -160,54 +160,54 @@ void LPTIM_ResetKeyIdle(void)
     }
 }
 
-void LPTIM_StartIO1(uint32_t timeout_s)
+void LPTIM_Bulu_Disonnect(uint32_t timeout_s)
 {
     uint32_t primask = __get_PRIMASK();
     __disable_irq();
-    s_tmr.io1.active = 1;
-    s_tmr.io1.sec = 0;
-    s_tmr.io1.timeout = timeout_s;
-    g_io1_timeout = 0;
+    s_tmr.bulu.active = 1;
+    s_tmr.bulu.sec = 0;
+    s_tmr.bulu.timeout = timeout_s;
+    g_bulu_timeout = 0;
     if (primask == 0U)
     {
         __enable_irq();
     }
 }
 
-void LPTIM_StopIO1(void)
+void LPTIM_Bulu_Connect(void)
 {
     uint32_t primask = __get_PRIMASK();
     __disable_irq();
-    s_tmr.io1.active = 0;
-    s_tmr.io1.sec = 0;
-    g_io1_timeout = 0;
+    s_tmr.bulu.active = 0;
+    s_tmr.bulu.sec = 0;
+    g_bulu_timeout = 0;
     if (primask == 0U)
     {
         __enable_irq();
     }
 }
 
-void LPTIM_StartIO2(uint32_t timeout_s)
+void LPTIM_Music_Stop(uint32_t timeout_s)
 {
     uint32_t primask = __get_PRIMASK();
     __disable_irq();
-    s_tmr.io2.active = 1;
-    s_tmr.io2.sec = 0;
-    s_tmr.io2.timeout = timeout_s;
-    g_io2_timeout = 0;
+    s_tmr.music.active = 1;
+    s_tmr.music.sec = 0;
+    s_tmr.music.timeout = timeout_s;
+    g_music_timeout = 0;
     if (primask == 0U)
     {
         __enable_irq();
     }
 }
 
-void LPTIM_StopIO2(void)
+void LPTIM_Music_Play(void)
 {
     uint32_t primask = __get_PRIMASK();
     __disable_irq();
-    s_tmr.io2.active = 0;
-    s_tmr.io2.sec = 0;
-    g_io2_timeout = 0;
+    s_tmr.music.active = 0;
+    s_tmr.music.sec = 0;
+    g_music_timeout = 0;
     if (primask == 0U)
     {
         __enable_irq();
@@ -229,23 +229,23 @@ void LPTIM_OnTick(void)
         g_key_idle_timeout = 1;
     }
 
-    if (s_tmr.io1.active)
+    if (s_tmr.bulu.active)
     {
-        s_tmr.io1.sec++;
-        if (s_tmr.io1.sec >= s_tmr.io1.timeout)
+        s_tmr.bulu.sec++;
+        if (s_tmr.bulu.sec >= s_tmr.bulu.timeout)
         {
-            s_tmr.io1.active = 0;
-            g_io1_timeout = 1;
+            s_tmr.bulu.active = 0;
+            g_bulu_timeout = 1;
         }
     }
 
-    if (s_tmr.io2.active)
+    if (s_tmr.music.active)
     {
-        s_tmr.io2.sec++;
-        if (s_tmr.io2.sec >= s_tmr.io2.timeout)
+        s_tmr.music.sec++;
+        if (s_tmr.music.sec >= s_tmr.music.timeout)
         {
-            s_tmr.io2.active = 0;
-            g_io2_timeout = 1;
+            s_tmr.music.active = 0;
+            g_music_timeout = 1;
         }
     }
 

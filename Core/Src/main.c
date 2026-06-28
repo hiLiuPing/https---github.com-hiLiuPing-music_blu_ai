@@ -420,7 +420,7 @@ void My_PostSleep_Function(uint32_t x)
             is_lptim_wake = Sleep_ProcessPendingLptimWake();
         }
 
-        uint32_t has_lptim_event = (g_quote_ready || g_key_idle_timeout || g_io1_timeout || g_io2_timeout) ? 1U : 0U;
+        uint32_t has_lptim_event = (g_quote_ready || g_key_idle_timeout || g_bulu_timeout || g_music_timeout) ? 1U : 0U;
 
         HAL_ResumeTick();
         Sleep_EnableRunIrqs();
@@ -436,7 +436,7 @@ void My_PostSleep_Function(uint32_t x)
                 WakeRuntimeTasks(1U);
             }
         }
-        else if (g_key_idle_timeout || g_io1_timeout || g_io2_timeout || g_quote_ready)
+        else if (g_key_idle_timeout || g_bulu_timeout || g_music_timeout || g_quote_ready)
         {
             WakeRuntimeTasks(1U);
         }
