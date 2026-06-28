@@ -8,6 +8,7 @@
 #include "key.h"
 #include "log.h"
 #include "data_app.h"
+#include "music_fft.h"
 #include "music_app.h"
 #include "oled_ui.h"
 #include "rgb_led.h"
@@ -118,6 +119,14 @@ void HardwareInitTask(void *argument)
     I2C_Bus_Init(&i2c_bus_2);
     OLED_UI_Init(&i2c_bus_1);
     log_printf("oled init done.\n");
+    if (MusicFFT_Init() != HAL_OK)
+    {
+        log_printf("music fft init failed.\n");
+    }
+    else
+    {
+        log_printf("music fft init done.\n");
+    }
     if (spi_flash_init(&flash_32mb, &hspi1, SPI1_CS_GPIO_Port, SPI1_CS_Pin) != 0)
     {
         log_printf("Flash Hardware Init Failed!\r\n");

@@ -5,6 +5,7 @@
 #include "ui_nav.h"
 #include "ui_page.h"
 #include "ui_popup.h"
+#include "music_fft.h"
 
 static unsigned int OLED_UI_BuildSeed(void);
 
@@ -66,6 +67,8 @@ void OLED_UI_Init(I2C_Bus_t *bus)
 
 void OLED_UI_Update(void)
 {
+    MusicFFT_Process();
+
     // 所有 UI 周期逻辑都由导航层统一推进。
     UI_Nav_Update();
 }

@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "log.h"
+#include "music_fft.h"
 Music_Ble_State_t g_music_ble_state = {0};
 
 /*
@@ -148,6 +149,7 @@ void Music_PowerOn(void)
 void Music_PowerOff(void)
 {
     log_printf("Music_PowerOff\r\n");
+    MusicFFT_Stop();
     HAL_GPIO_WritePin(BULU_PWR_EN_GPIO_Port, BULU_PWR_EN_Pin, GPIO_PIN_RESET);
     vTaskDelay(pdMS_TO_TICKS(50));
     HAL_GPIO_WritePin(AD_PWER_EN_GPIO_Port, AD_PWER_EN_Pin, GPIO_PIN_RESET);

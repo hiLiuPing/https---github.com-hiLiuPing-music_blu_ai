@@ -1,4 +1,5 @@
 #include "../ui_widget.h"
+#include "music_fft.h"
 
 static uint8_t UI_Widget_MusicTriWave(uint8_t phase, uint8_t period)
 {
@@ -38,7 +39,7 @@ static void UI_Widget_DrawMusicPauseIcon(u8g2_t *u8g2, int16_t x, int16_t y, uin
 
 static void UI_Widget_DrawMusicSpectrum(u8g2_t *u8g2, int16_t x, int16_t y, uint8_t w, uint8_t h)
 {
-    static const uint8_t s_phase_offsets[4] = {0U, 3U, 6U, 9U};
+    uint8_t bars[MUSIC_FFT_BAR_COUNT];
     uint8_t i;
     uint8_t bar_w = 4U;
     uint8_t bar_gap = 3U;
@@ -47,19 +48,28 @@ static void UI_Widget_DrawMusicSpectrum(u8g2_t *u8g2, int16_t x, int16_t y, uint
     uint8_t total_w = (uint8_t)((total_bars * bar_w) + ((total_bars - 1U) * bar_gap));
     int16_t start_x = x + (((int16_t)w - total_w) / 2);
     int16_t baseline_y = y + (int16_t)h - 4;
-    uint8_t min_h = 4U;
-    uint8_t amp_h = 10U;
+    uint8_t max_h = (h > 8U) ? (uint8_t)(h - 8U) : h;
+
+    MusicFFT_GetBars(bars, MUSIC_FFT_BAR_COUNT);
 
     for (i = 0; i < pair_count; i++)
     {
-        uint8_t wave = UI_Widget_MusicTriWave((uint8_t)(g_ui_spectrum_tick + s_phase_offsets[i]), 12U);
-        uint8_t bar_h = (uint8_t)(min_h + ((wave * amp_h) / 5U));
+        uint8_t left_h = (uint8_t)((bars[i] * max_h) / MUSIC_FFT_BAR_MAX);
+        uint8_t right_h = (uint8_t)((bars[MUSIC_FFT_BAR_COUNT - 1U - i] * max_h) / MUSIC_FFT_BAR_MAX);
         int16_t left_x = start_x + (int16_t)(i * (bar_w + bar_gap));
         int16_t right_x = start_x + (int16_t)((total_bars - 1U - i) * (bar_w + bar_gap));
-        int16_t top_y = baseline_y - bar_h;
 
-        u8g2_DrawRBox(u8g2, left_x, top_y, bar_w, bar_h, 1);
-        u8g2_DrawRBox(u8g2, right_x, top_y, bar_w, bar_h, 1);
+        if (left_h < 1U)
+        {
+            left_h = 1U;
+        }
+        if (right_h < 1U)
+        {
+            right_h = 1U;
+        }
+
+        u8g2_DrawRBox(u8g2, left_x, baseline_y - left_h, bar_w, left_h, 1);
+        u8g2_DrawRBox(u8g2, right_x, baseline_y - right_h, bar_w, right_h, 1);
     }
 }
 

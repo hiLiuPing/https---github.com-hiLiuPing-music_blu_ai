@@ -23,6 +23,7 @@
 #include "lptim.h"
 #include "quadspi.h"
 #include "rtc.h"
+#include "sai.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -236,6 +237,7 @@ int main(void)
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   MX_RTC_Init();
+  MX_SAI1_Init();
   /* USER CODE BEGIN 2 */
   User_Tasks_Init();
   vTaskStartScheduler();

@@ -62,6 +62,8 @@ extern uart_dma_t uart1_admin; // 唯一实体的定义
 extern DMA_HandleTypeDef hdma_i2c1_tx;
 extern I2C_HandleTypeDef hi2c1;
 extern LPTIM_HandleTypeDef hlptim1;
+extern DMA_HandleTypeDef hdma_sai1_a;
+extern SAI_HandleTypeDef hsai_BlockA1;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim6;
@@ -304,6 +306,20 @@ void TIM6_DAC_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles DMA2 channel1 global interrupt.
+  */
+void DMA2_Channel1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Channel1_IRQn 0 */
+
+  /* USER CODE END DMA2_Channel1_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_sai1_a);
+  /* USER CODE BEGIN DMA2_Channel1_IRQn 1 */
+
+  /* USER CODE END DMA2_Channel1_IRQn 1 */
+}
+
+/**
   * @brief This function handles LPTIM1 global interrupt.
   */
 void LPTIM1_IRQHandler(void)
@@ -315,6 +331,20 @@ void LPTIM1_IRQHandler(void)
   /* USER CODE BEGIN LPTIM1_IRQn 1 */
 
   /* USER CODE END LPTIM1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles SAI1 global interrupt.
+  */
+void SAI1_IRQHandler(void)
+{
+  /* USER CODE BEGIN SAI1_IRQn 0 */
+
+  /* USER CODE END SAI1_IRQn 0 */
+  HAL_SAI_IRQHandler(&hsai_BlockA1);
+  /* USER CODE BEGIN SAI1_IRQn 1 */
+
+  /* USER CODE END SAI1_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

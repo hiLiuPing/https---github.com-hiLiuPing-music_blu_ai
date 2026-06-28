@@ -7,6 +7,7 @@
 #include "user_TasksInit.h"
 #include "data_app.h"
 #include "log.h"
+#include "music_fft.h"
 #include "music_app.h"
 #include "weather_app.h"
 #include "oled_ui.h"
@@ -57,7 +58,7 @@ void KeyManllegeTask(void *pvParameters)
                     {
                         (void)OLED_UI_PostStateEvent(UI_EVT_SHOW_ON, "KeyMgr");
                     }
-                    // Weather_FillDemoData();
+                    Weather_FillDemoData();
                     if (g_music_ble_state.music_ble_power == 0)
                     {
                         /* code */
@@ -119,6 +120,8 @@ void KeyManllegeTask(void *pvParameters)
 
                 case MSG_BLUETOOTH_DISCONNECT:
                     g_music_ble_state.ble_connected = 0;
+                    g_music_ble_state.music_played = 0;
+                    MusicFFT_Stop();
                     if (g_music_ble_state.ble_ever_connected)
                     {
                         LPTIM_StartIO1(180U);
@@ -134,6 +137,7 @@ void KeyManllegeTask(void *pvParameters)
                     }
                     g_music_ble_state.music_played = 1;
                     g_music_ble_state.music_ever_played = 1;
+                    MusicFFT_Start();
                     LPTIM_StopIO2();
                     LED_Update();
                     break;
@@ -145,6 +149,7 @@ void KeyManllegeTask(void *pvParameters)
                         break;
                     }
                     g_music_ble_state.music_played = 0;
+                    MusicFFT_Stop();
                     if (g_music_ble_state.music_ever_played)
                     {
                         LPTIM_StartIO2(300U);

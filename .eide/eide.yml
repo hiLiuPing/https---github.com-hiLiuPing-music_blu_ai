@@ -28,6 +28,7 @@ virtualFolder:
                 - path: Core/Src/lptim.c
                 - path: Core/Src/quadspi.c
                 - path: Core/Src/rtc.c
+                - path: Core/Src/sai.c
                 - path: Core/Src/spi.c
                 - path: Core/Src/tim.c
                 - path: Core/Src/usart.c
@@ -61,6 +62,8 @@ virtualFolder:
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_qspi.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rtc.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rtc_ex.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sai.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sai_ex.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi_ex.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c
@@ -73,6 +76,19 @@ virtualFolder:
     - name: ::CMSIS
       files: []
       folders: []
+    - name: Middlewares
+      files: []
+      folders:
+        - name: Library
+          files: []
+          folders:
+            - name: DSP Library
+              files: []
+              folders:
+                - name: DSP Library
+                  files:
+                    - path: Middlewares/ST/ARM/DSP/Lib/arm_cortexM4lf_math.lib
+                  folders: []
 dependenceList: []
 outDir: build
 miscInfo:
@@ -93,29 +109,31 @@ targets:
         - Drivers/STM32L4xx_HAL_Driver/Inc/Legacy
         - Drivers/CMSIS/Device/ST/STM32L4xx/Include
         - Drivers/CMSIS/Include
+        - Middlewares/ST/ARM/DSP/Inc
         - .cmsis/include
         - MDK-ARM/RTE/_music_blu_ai
-        - USER/Middle/FreeRTOS/Source/include
-        - USER/Middle/FreeRTOS/Source/portable/GCC/ARM_CM4F
-        - USER/TASK
-        - USER/BSP/LOG
-        - USER/Middle/LittleFS
-        - USER/BSP/FLASH
-        - USER/Middle/lwrb
         - USER/APP
+        - USER/BSP/COMMON
         - USER/BSP/EE24
+        - USER/BSP/FLASH
         - USER/BSP/KEY
-        - USER/BSP/LED
         - USER/BSP/LIS3DH
+        - USER/BSP/LOG
+        - USER/BSP/MAX17048
         - USER/BSP/QSPI
         - USER/BSP/SHT40
+        - USER/GUI
+        - USER/Middle/FreeRTOS/Source/include
+        - USER/Middle/FreeRTOS/Source/portable/GCC/ARM_CM4F
         - USER/Middle/i2s_bus
+        - USER/Middle/LittleFS
+        - USER/Middle/lwrb
         - USER/Middle/u8g2
         - USER/Middle/uart_dma
-        - USER/BSP
-        - USER
-        - USER/GUI
-        - USER/BSP/MAX17048
+        - USER/TASK
+        - USER/BSP/LED
+        - USER/Middle/CMSIS-DSP/Include
+        - USER/Middle/CMSIS-DSP/PrivateInclude
       libList: []
     excludeList: []
     settings:
