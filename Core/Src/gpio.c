@@ -53,7 +53,7 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, DOWN_Pin|UP_Pin|PLAY_Pin|ESP32_PWR_EN_Pin
-                          |ARM_RST_Pin|BULU_PWER_EN_Pin, GPIO_PIN_RESET);
+                          |ARM_RST_Pin|BULU_PWR_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(AD_PWER_EN_GPIO_Port, AD_PWER_EN_Pin, GPIO_PIN_RESET);
@@ -68,9 +68,9 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(CONNECT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DOWN_Pin UP_Pin PLAY_Pin ESP32_PWR_EN_Pin
-                           ARM_RST_Pin BULU_PWER_EN_Pin */
+                           ARM_RST_Pin BULU_PWR_EN_Pin */
   GPIO_InitStruct.Pin = DOWN_Pin|UP_Pin|PLAY_Pin|ESP32_PWR_EN_Pin
-                          |ARM_RST_Pin|BULU_PWER_EN_Pin;
+                          |ARM_RST_Pin|BULU_PWR_EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

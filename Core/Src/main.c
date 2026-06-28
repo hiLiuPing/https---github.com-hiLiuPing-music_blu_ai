@@ -30,9 +30,14 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "freertos_app.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "semphr.h"
+#include "user_TasksInit.h"
+#include "oled_ui.h"
+#include "systemMonitor_app.h"
+#include "data_app.h"
+#include "log.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,6 +65,119 @@
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
+static void Sleep_DisableStopWakeIrqs(void)
+{
+  HAL_NVIC_DisableIRQ(USART1_IRQn);
+  HAL_NVIC_DisableIRQ(USART3_IRQn);
+  HAL_NVIC_DisableIRQ(DMA1_Channel3_IRQn);
+  HAL_NVIC_DisableIRQ(DMA1_Channel4_IRQn);
+  HAL_NVIC_DisableIRQ(DMA1_Channel5_IRQn);
+  HAL_NVIC_DisableIRQ(I2C2_EV_IRQn);
+  HAL_NVIC_DisableIRQ(I2C2_ER_IRQn);
+  HAL_NVIC_DisableIRQ(TIM7_IRQn);
+
+  NVIC_ClearPendingIRQ(USART1_IRQn);
+  NVIC_ClearPendingIRQ(USART3_IRQn);
+  NVIC_ClearPendingIRQ(DMA1_Channel3_IRQn);
+  NVIC_ClearPendingIRQ(DMA1_Channel4_IRQn);
+  NVIC_ClearPendingIRQ(DMA1_Channel5_IRQn);
+  NVIC_ClearPendingIRQ(I2C2_EV_IRQn);
+  NVIC_ClearPendingIRQ(I2C2_ER_IRQn);
+  NVIC_ClearPendingIRQ(TIM7_IRQn);
+}
+
+static void Sleep_EnableRunIrqs(void)
+{
+  __HAL_UART_CLEAR_IDLEFLAG(&huart1);
+  NVIC_ClearPendingIRQ(USART1_IRQn);
+  NVIC_ClearPendingIRQ(USART2_IRQn);
+  NVIC_ClearPendingIRQ(DMA1_Channel3_IRQn);
+  NVIC_ClearPendingIRQ(DMA1_Channel4_IRQn);
+  NVIC_ClearPendingIRQ(DMA1_Channel5_IRQn);
+  NVIC_ClearPendingIRQ(I2C2_EV_IRQn);
+  NVIC_ClearPendingIRQ(I2C2_ER_IRQn);
+  // NVIC_ClearPendingIRQ(TIM7_IRQn);
+  NVIC_ClearPendingIRQ(LPTIM1_IRQn);
+  HAL_NVIC_EnableIRQ(USART1_IRQn);
+  HAL_NVIC_EnableIRQ(USART2_IRQn);
+  HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
+  HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
+  HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+  HAL_NVIC_EnableIRQ(I2C2_EV_IRQn);
+  HAL_NVIC_EnableIRQ(I2C2_ER_IRQn);
+  // HAL_NVIC_EnableIRQ(TIM7_IRQn);
+}
+
+static void WakeRuntimeTasks(uint8_t wake_display)
+{
+  g_ui.sys_running = 1U;
+
+  if (xKeyScanTaskWakeSemaphore != NULL)
+    xSemaphoreGive(xKeyScanTaskWakeSemaphore);
+  if (xLedTaskWakeSemaphore != NULL)
+    xSemaphoreGive(xLedTaskWakeSemaphore);
+  if (xOLedShowTaskWakeSemaphore != NULL)
+    xSemaphoreGive(xOLedShowTaskWakeSemaphore);
+  if (xTransmitTaskWakeSemaphore != NULL)
+    xSemaphoreGive(xTransmitTaskWakeSemaphore);
+  if (xAppDataTaskWakeSemaphore != NULL)
+    xSemaphoreGive(xAppDataTaskWakeSemaphore);
+  if (xWeatherSyncTaskWakeSemaphore != NULL)
+    xSemaphoreGive(xWeatherSyncTaskWakeSemaphore);
+
+  if (wake_display)
+  {
+    (void)OLED_UI_PostStateEvent(UI_EVT_SHOW_ON, "WakeRuntime");
+  }
+}
+
+static void HandlePowerSignalExti(uint16_t gpio_pin)
+{
+  TiltKey_t key = MSG_TILT_NONE;
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+  if (Key_Music_queue == NULL)
+  {
+    return;
+  }
+
+  if (gpio_pin == POWER_IN_5V_Pin)
+  {
+    GPIO_PinState state = HAL_GPIO_ReadPin(POWER_IN_5V_GPIO_Port, POWER_IN_5V_Pin);
+    key = (state == GPIO_PIN_RESET) ? MSG_PWER_IN : MSG_PWER_OUT;
+  }
+  else if (gpio_pin == BAT_CHG_Pin)
+  {
+    GPIO_PinState state = HAL_GPIO_ReadPin(BAT_CHG_GPIO_Port, BAT_CHG_Pin);
+    key = (state == GPIO_PIN_RESET) ? MSG_PWER_CHAGNE : MSG_PWER_FULL;
+  }
+
+  if (key == MSG_TILT_NONE)
+  {
+    return;
+  }
+
+  (void)xQueueSendFromISR(Key_Music_queue, &key, &xHigherPriorityTaskWoken);
+  portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+
+void vApplicationMallocFailedHook(void)
+{
+  taskDISABLE_INTERRUPTS();
+  for (;;);
+}
+
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
+{
+  (void)xTask;
+  (void)pcTaskName;
+  taskDISABLE_INTERRUPTS();
+  for (;;);
+}
+
+void vApplicationIdleHook(void)
+{
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -107,7 +225,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-  MX_FREERTOS_Init();
+  User_Tasks_Init();
   vTaskStartScheduler();
   /* USER CODE END 2 */
 
@@ -173,6 +291,141 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+/**
+  * @brief  STOP wake clock recovery without HAL tick dependency.
+  */
+static void SystemClock_STOPResume(void)
+{
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    uint32_t timeout;
+
+    MODIFY_REG(PWR->CR1, PWR_CR1_VOS, PWR_CR1_VOS_0);
+
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM = 1;
+    RCC_OscInitStruct.PLL.PLLN = 20;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
+    RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
+    RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    __HAL_FLASH_SET_LATENCY(FLASH_LATENCY_4);
+    if (__HAL_FLASH_GET_LATENCY() != FLASH_LATENCY_4)
+    {
+        Error_Handler();
+    }
+
+    MODIFY_REG(RCC->CFGR, RCC_CFGR_HPRE | RCC_CFGR_PPRE1 | RCC_CFGR_PPRE2,
+               RCC_SYSCLK_DIV1 | RCC_HCLK_DIV1 | RCC_HCLK_DIV1);
+
+    MODIFY_REG(RCC->CFGR, RCC_CFGR_SW, RCC_SYSCLKSOURCE_PLLCLK);
+    timeout = 200000;
+    while (__HAL_RCC_GET_SYSCLK_SOURCE() != RCC_CFGR_SWS_PLL)
+    {
+        if (--timeout == 0)
+        {
+            Error_Handler();
+        }
+    }
+
+    SystemCoreClock = HAL_RCC_GetSysClockFreq();
+}
+void EXTI2_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(SW_Pin);
+    PWR->SCR = PWR_SCR_CWUF;
+    (void)PWR->SCR;
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin == BAT_CHG_Pin || GPIO_Pin == POWER_IN_5V_Pin)
+    {
+        HandlePowerSignalExti(GPIO_Pin);
+    }
+}
+
+void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim)
+{
+    if (hlptim->Instance == LPTIM1)
+    {
+        LPTIM_OnTick();
+    }
+}
+
+void My_PreSleep_Function(uint32_t *x)
+{
+    if (x == NULL)
+    {
+        return;
+    }
+
+    if (g_ui.sys_running == 0)
+    {
+        HAL_SuspendTick();
+        __HAL_GPIO_EXTI_CLEAR_IT(SW_Pin);
+        __HAL_GPIO_EXTI_CLEAR_IT(BAT_CHG_Pin);
+        __HAL_GPIO_EXTI_CLEAR_IT(POWER_IN_5V_Pin);
+        HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+        __DSB();
+
+        PWR->SCR = PWR_SCR_CWUF;
+        (void)PWR->SCR;
+
+        Sleep_DisableStopWakeIrqs();
+        *x = 0U;
+        HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+    }
+}
+
+void My_PostSleep_Function(uint32_t x)
+{
+    (void)x;
+    if (g_ui.sys_running == 0)
+    {
+        uint32_t is_key_wake = (EXTI->PR1 & SW_Pin) != 0U;
+        uint32_t is_power_wake = (EXTI->PR1 & (BAT_CHG_Pin | POWER_IN_5V_Pin)) != 0U;
+        uint32_t is_lptim_wake = (EXTI->PR2 & LPTIM_EXTI_LINE_LPTIM1) != 0U;
+        uint32_t is_quote_wake = g_quote_ready ? 1U : 0U;
+        uint32_t is_timeout_wake = (g_key_idle_timeout || g_io1_timeout || g_io2_timeout) ? 1U : 0U;
+        uint32_t has_lptim_event = (is_quote_wake || is_timeout_wake) ? 1U : 0U;
+
+        SystemClock_STOPResume();
+
+        HAL_NVIC_DisableIRQ(EXTI2_IRQn);
+        NVIC_ClearPendingIRQ(EXTI2_IRQn);
+        EXTI->PR2 = LPTIM_EXTI_LINE_LPTIM1;
+        NVIC_ClearPendingIRQ(LPTIM1_IRQn);
+
+        HAL_ResumeTick();
+        Sleep_EnableRunIrqs();
+
+        if (is_key_wake || is_power_wake)
+        {
+            WakeRuntimeTasks(1U);
+        }
+        else if (is_lptim_wake)
+        {
+            if (has_lptim_event)
+            {
+                WakeRuntimeTasks(1U);
+            }
+        }
+        else if (g_key_idle_timeout || g_io1_timeout || g_io2_timeout || g_quote_ready)
+        {
+            WakeRuntimeTasks(1U);
+        }
+
+        PWR->SCR = PWR_SCR_CWUF;
+        (void)PWR->SCR;
+    }
+}
 /* USER CODE END 4 */
 
 /**

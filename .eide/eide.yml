@@ -112,6 +112,9 @@ targets:
         - USER/Middle/i2s_bus
         - USER/Middle/u8g2
         - USER/Middle/uart_dma
+        - USER/BSP
+        - USER
+        - USER/GUI
       libList: []
     excludeList: []
     settings:

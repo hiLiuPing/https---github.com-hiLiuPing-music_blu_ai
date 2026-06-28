@@ -83,8 +83,8 @@ void Error_Handler(void);
 #define ESP32_PWR_EN_GPIO_Port GPIOC
 #define ARM_RST_Pin GPIO_PIN_7
 #define ARM_RST_GPIO_Port GPIOC
-#define BULU_PWER_EN_Pin GPIO_PIN_9
-#define BULU_PWER_EN_GPIO_Port GPIOC
+#define BULU_PWR_EN_Pin GPIO_PIN_9
+#define BULU_PWR_EN_GPIO_Port GPIOC
 #define SPI1_CS_Pin GPIO_PIN_2
 #define SPI1_CS_GPIO_Port GPIOD
 #define MUSIC_ON_Pin GPIO_PIN_8

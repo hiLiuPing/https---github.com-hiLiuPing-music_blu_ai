@@ -21,7 +21,8 @@
 #include "lptim.h"
 
 /* USER CODE BEGIN 0 */
-
+#include <string.h>
+#include "user_TasksInit.h"
 /* USER CODE END 0 */
 
 LPTIM_HandleTypeDef hlptim1;
@@ -107,5 +108,159 @@ void HAL_LPTIM_MspDeInit(LPTIM_HandleTypeDef* lptimHandle)
 }
 
 /* USER CODE BEGIN 1 */
+/* LSE 32768 Hz / DIV128 = 256 Hz */
+#define LPTIM_TICK_HZ           256U
+#define LPTIM_ARR_1S            255U
+
+#define KEY_IDLE_TIMEOUT_S      10800U
+
+volatile uint8_t g_key_idle_timeout = 0;
+volatile uint8_t g_io1_timeout = 0;
+volatile uint8_t g_io2_timeout = 0;
+volatile uint8_t g_quote_ready = 0;
+
+typedef struct {
+    uint32_t sec;
+    uint32_t timeout;
+    uint8_t active;
+} SoftTimer_t;
+
+typedef struct {
+    SoftTimer_t quote;
+    SoftTimer_t key_idle;
+    SoftTimer_t io1;
+    SoftTimer_t io2;
+    uint32_t quote_interval;
+} LPTIM1_SoftTimer_t;
+
+static LPTIM1_SoftTimer_t s_tmr = {0};
+
+void LPTIM_Start1Hz(void)
+{
+    EXTI->PR2 = LPTIM_EXTI_LINE_LPTIM1;
+    NVIC_ClearPendingIRQ(LPTIM1_IRQn);
+    memset(&s_tmr, 0, sizeof(s_tmr));
+    HAL_LPTIM_Counter_Start_IT(&hlptim1, LPTIM_ARR_1S);
+}
+
+void LPTIM_Stop1Hz(void)
+{
+    HAL_LPTIM_Counter_Stop_IT(&hlptim1);
+}
+
+void LPTIM_ResetKeyIdle(void)
+{
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+    s_tmr.key_idle.sec = 0;
+    g_key_idle_timeout = 0;
+    if (primask == 0U)
+    {
+        __enable_irq();
+    }
+}
+
+void LPTIM_StartIO1(uint32_t timeout_s)
+{
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+    s_tmr.io1.active = 1;
+    s_tmr.io1.sec = 0;
+    s_tmr.io1.timeout = timeout_s;
+    g_io1_timeout = 0;
+    if (primask == 0U)
+    {
+        __enable_irq();
+    }
+}
+
+void LPTIM_StopIO1(void)
+{
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+    s_tmr.io1.active = 0;
+    s_tmr.io1.sec = 0;
+    g_io1_timeout = 0;
+    if (primask == 0U)
+    {
+        __enable_irq();
+    }
+}
+
+void LPTIM_StartIO2(uint32_t timeout_s)
+{
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+    s_tmr.io2.active = 1;
+    s_tmr.io2.sec = 0;
+    s_tmr.io2.timeout = timeout_s;
+    g_io2_timeout = 0;
+    if (primask == 0U)
+    {
+        __enable_irq();
+    }
+}
+
+void LPTIM_StopIO2(void)
+{
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+    s_tmr.io2.active = 0;
+    s_tmr.io2.sec = 0;
+    g_io2_timeout = 0;
+    if (primask == 0U)
+    {
+        __enable_irq();
+    }
+}
+
+void LPTIM_SetQuoteInterval(uint32_t sec)
+{
+    s_tmr.quote_interval = sec;
+    s_tmr.quote.sec = 0;
+}
+
+void LPTIM_OnTick(void)
+{
+    s_tmr.key_idle.sec++;
+    if (s_tmr.key_idle.sec >= KEY_IDLE_TIMEOUT_S)
+    {
+        s_tmr.key_idle.sec = 0;
+        g_key_idle_timeout = 1;
+    }
+
+    if (s_tmr.io1.active)
+    {
+        s_tmr.io1.sec++;
+        if (s_tmr.io1.sec >= s_tmr.io1.timeout)
+        {
+            s_tmr.io1.active = 0;
+            g_io1_timeout = 1;
+        }
+    }
+
+    if (s_tmr.io2.active)
+    {
+        s_tmr.io2.sec++;
+        if (s_tmr.io2.sec >= s_tmr.io2.timeout)
+        {
+            s_tmr.io2.active = 0;
+            g_io2_timeout = 1;
+        }
+    }
+
+    s_tmr.quote.sec++;
+    if (s_tmr.quote.sec >= s_tmr.quote_interval)
+    {
+        s_tmr.quote.sec = 0;
+        g_quote_ready = 1;
+        BaseType_t xTaskWoken = pdFALSE;
+        if (AppDataTaskHandle != NULL)
+        {
+            vTaskNotifyGiveFromISR(AppDataTaskHandle, &xTaskWoken);
+        }
+        portYIELD_FROM_ISR(xTaskWoken);
+    }
+}
 
 /* USER CODE END 1 */

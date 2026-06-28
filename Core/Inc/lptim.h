@@ -41,7 +41,20 @@ extern LPTIM_HandleTypeDef hlptim1;
 void MX_LPTIM1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+void LPTIM_Start1Hz(void);
+void LPTIM_Stop1Hz(void);
+void LPTIM_ResetKeyIdle(void);
+void LPTIM_StartIO1(uint32_t timeout_s);
+void LPTIM_StopIO1(void);
+void LPTIM_StartIO2(uint32_t timeout_s);
+void LPTIM_StopIO2(void);
+void LPTIM_SetQuoteInterval(uint32_t sec);
+void LPTIM_OnTick(void);
 
+extern volatile uint8_t g_key_idle_timeout;
+extern volatile uint8_t g_io1_timeout;
+extern volatile uint8_t g_io2_timeout;
+extern volatile uint8_t g_quote_ready;
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

@@ -22,11 +22,15 @@
 #include "stm32l4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "FreeRTOS.h"    // 解决 BaseType_t, pdFALSE 等定义问题
+#include "task.h"        // 解决 TaskHandle_t, vTaskNotifyGiveFromISR 等问题
+#include "uart_dma.h"    // 解决 uart_dma_rx_check, UART_DMA_RX_SIZE 等问题
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
-
+extern TaskHandle_t TransmitTaskHandle; // 声明外部任务句柄
+extern uart_dma_t uart1_admin; // 唯一实体的定义
 /* USER CODE END TD */
 
 /* Private define ------------------------------------------------------------*/
@@ -266,7 +270,18 @@ void I2C1_ER_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
+    if(__HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE))
+    {
+        __HAL_UART_CLEAR_IDLEFLAG(&huart1);
+
+        uart_dma_rx_check(&uart1_admin);   // 搬运DMA数据
+        
+        if(TransmitTaskHandle != NULL) {
+            vTaskNotifyGiveFromISR(TransmitTaskHandle, &xHigherPriorityTaskWoken);
+        }
+    }
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
