@@ -57,12 +57,38 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define CONNECT_Pin GPIO_PIN_0
+#define CONNECT_GPIO_Port GPIOC
+#define DOWN_Pin GPIO_PIN_1
+#define DOWN_GPIO_Port GPIOC
+#define UP_Pin GPIO_PIN_2
+#define UP_GPIO_Port GPIOC
+#define PLAY_Pin GPIO_PIN_3
+#define PLAY_GPIO_Port GPIOC
 #define SW_Pin GPIO_PIN_0
 #define SW_GPIO_Port GPIOA
-#define LED_Pin GPIO_PIN_10
-#define LED_GPIO_Port GPIOB
+#define LED_B_Pin GPIO_PIN_1
+#define LED_B_GPIO_Port GPIOA
+#define BAT_CHG_Pin GPIO_PIN_4
+#define BAT_CHG_GPIO_Port GPIOA
+#define LED_R_Pin GPIO_PIN_5
+#define LED_R_GPIO_Port GPIOA
+#define POWER_IN_5V_Pin GPIO_PIN_2
+#define POWER_IN_5V_GPIO_Port GPIOB
+#define LED_G_Pin GPIO_PIN_10
+#define LED_G_GPIO_Port GPIOB
+#define AD_PWER_EN_Pin GPIO_PIN_12
+#define AD_PWER_EN_GPIO_Port GPIOB
+#define ESP32_PWR_EN_Pin GPIO_PIN_6
+#define ESP32_PWR_EN_GPIO_Port GPIOC
+#define ARM_RST_Pin GPIO_PIN_7
+#define ARM_RST_GPIO_Port GPIOC
+#define BULU_PWER_EN_Pin GPIO_PIN_9
+#define BULU_PWER_EN_GPIO_Port GPIOC
 #define SPI1_CS_Pin GPIO_PIN_2
 #define SPI1_CS_GPIO_Port GPIOD
+#define MUSIC_ON_Pin GPIO_PIN_8
+#define MUSIC_ON_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

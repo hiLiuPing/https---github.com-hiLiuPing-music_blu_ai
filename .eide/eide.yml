@@ -23,24 +23,17 @@ virtualFolder:
               files:
                 - path: Core/Src/main.c
                 - path: Core/Src/gpio.c
+                - path: Core/Src/dma.c
                 - path: Core/Src/i2c.c
+                - path: Core/Src/lptim.c
                 - path: Core/Src/quadspi.c
+                - path: Core/Src/rtc.c
                 - path: Core/Src/spi.c
+                - path: Core/Src/tim.c
                 - path: Core/Src/usart.c
                 - path: Core/Src/stm32l4xx_it.c
                 - path: Core/Src/stm32l4xx_hal_msp.c
                 - path: Core/Src/stm32l4xx_hal_timebase_tim.c
-              folders: []
-            - name: FreeRTOS
-              files:
-                - path: USER/Middle/FreeRTOS/Source/tasks.c
-                - path: USER/Middle/FreeRTOS/Source/list.c
-                - path: USER/Middle/FreeRTOS/Source/queue.c
-                - path: USER/Middle/FreeRTOS/Source/timers.c
-                - path: USER/Middle/FreeRTOS/Source/event_groups.c
-                - path: USER/Middle/FreeRTOS/Source/croutine.c
-                - path: USER/Middle/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c
-                - path: USER/Middle/FreeRTOS/Source/portable/MemMang/heap_4.c
               folders: []
     - name: Drivers
       files: []
@@ -64,7 +57,10 @@ virtualFolder:
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pwr_ex.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_cortex.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_exti.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_lptim.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_qspi.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rtc.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rtc_ex.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi_ex.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c
@@ -101,11 +97,21 @@ targets:
         - MDK-ARM/RTE/_music_blu_ai
         - USER/Middle/FreeRTOS/Source/include
         - USER/Middle/FreeRTOS/Source/portable/GCC/ARM_CM4F
-        - USER/BSP/LOG
-        - USER/BSP/FLASH
-        - USER/Middle/LittleFS
-        - USER/Middle/lwrb
         - USER/TASK
+        - USER/BSP/LOG
+        - USER/Middle/LittleFS
+        - USER/BSP/FLASH
+        - USER/Middle/lwrb
+        - USER/APP
+        - USER/BSP/EE24
+        - USER/BSP/KEY
+        - USER/BSP/LED
+        - USER/BSP/LIS3DH
+        - USER/BSP/QSPI
+        - USER/BSP/SHT40
+        - USER/Middle/i2s_bus
+        - USER/Middle/u8g2
+        - USER/Middle/uart_dma
       libList: []
     excludeList: []
     settings:

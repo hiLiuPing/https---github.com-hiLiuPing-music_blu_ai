@@ -6,7 +6,7 @@
 #include "log.h"
 #include "usart.h"
 static void LedBlinkTask(void *argument);
-static void FaultBlinkLoop(volatile uint32_t delay_cycles);
+// static void FaultBlinkLoop(volatile uint32_t delay_cycles);
 
 #define LED_BLINK_TASK_STACK_SIZE 128U
 
@@ -27,6 +27,7 @@ void vApplicationMallocFailedHook(void)
 {
   taskDISABLE_INTERRUPTS();
   // HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+
   for (;;)
   {
   }
@@ -45,22 +46,25 @@ static void LedBlinkTask(void *argument)
 {
   (void)argument;
 log_init(&huart2);
+// HAL_GPIO_WritePin(AD_POWER_EN_GPIO_Port, AD_POWER_EN_Pin, GPIO_PIN_SET);
+// HAL_GPIO_WritePin(BULU_POWER_EN_GPIO_Port, BULU_POWER_EN_Pin, GPIO_PIN_SET);
+
   for (;;)
   {
-    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    // HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     log_printf("LedBlinkTask");
     vTaskDelay(pdMS_TO_TICKS(1000));
     log_printf("aaaa");
   }
 }
 
-static void FaultBlinkLoop(volatile uint32_t delay_cycles)
-{
-  for (;;)
-  {
-    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-    for (volatile uint32_t i = 0; i < delay_cycles; i++)
-    {
-    }
-  }
-}
+// static void FaultBlinkLoop(volatile uint32_t delay_cycles)
+// {
+//   for (;;)
+//   {
+//     // HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+//     for (volatile uint32_t i = 0; i < delay_cycles; i++)
+//     {
+//     }
+//   }
+// }
