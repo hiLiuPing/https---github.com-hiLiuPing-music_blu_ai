@@ -26,7 +26,18 @@ void UI_Msg_HandleEvent(UI_Event_t event)
 {
     if (g_ui.cur_page == PAGE_BOOT)
     {
-        return;
+        /* 开机期间允许电池/电源事件通过，事件队列中的弹窗会在开机完成后显示。 */
+        switch (event)
+        {
+        case UI_EVT_BATTERY_LOW:
+        case UI_EVT_BATTERY_FULL:
+        case UI_EVT_BATTERY_CHARGING:
+        case UI_EVT_POWEROUT:
+        case UI_EVT_POWERIN:
+            break;
+        default:
+            return;
+        }
     }
 
     switch (event)

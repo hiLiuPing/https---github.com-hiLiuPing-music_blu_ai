@@ -47,7 +47,7 @@ void KeyTask(void *argument)
 
             if (Key_Scan(&key_event))
             {
-                xQueueSend(Key_Power_Queue, &key_event, portMAX_DELAY);
+                xQueueSend(Key_Power_queue, &key_event, portMAX_DELAY);
                 tilt_enable_timer = 3000;
             }
 

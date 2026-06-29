@@ -7,6 +7,7 @@
 
 #include "weather_app.h"
 #include "data_app.h"
+#include "led_app.h"
 #include "log.h"
 #include "oled_ui.h"
 #include "lptim.h"
@@ -15,6 +16,8 @@
 #include "user_TasksInit.h"
 
 extern QueueHandle_t OLED_UI_queue;
+extern QueueHandle_t LED_cmd_queue;
+
 /*
  * App-level monitor layer.
  * Keeps the remaining timeout actions behind a small shared facade.
@@ -113,7 +116,13 @@ uint8_t OLED_UI_PostStateEvent(UI_Event_t evt, const char *source)
 static void OLEDIdleTimeout(TimerHandle_t xTimer)
 {
     (void)xTimer;
+    
     log_printf("[OLED] idle timeout\r\n");
+                           if (LED_cmd_queue != NULL)
+                        {
+                           LED_EVT_t evt = LED_EVT_STOP;
+                            xQueueSend(LED_cmd_queue, &evt, 0);
+                        } 
     (void)OLED_UI_PostStateEvent(UI_EVT_SLEEP_REQUEST, "Monitor");
 }
 

@@ -15,10 +15,12 @@ extern "C" {
 #include "queue.h"
 #include "semphr.h"
 /* 输入与控制消息队列。 */
-extern QueueHandle_t Key_Power_Queue;
+extern QueueHandle_t Key_Power_queue;
 extern QueueHandle_t Key_Music_queue;
 extern QueueHandle_t music_cmd_queue;
 extern QueueHandle_t OLED_UI_queue;
+extern QueueHandle_t LED_cmd_queue;
+
 
 
 

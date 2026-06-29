@@ -10,21 +10,18 @@
 #include "data_app.h"
 #include "music_app.h"
 #include "oled_ui.h"
-#include "rgb_led.h"
+
 #include "sensors_app.h"
 #include "weather_app.h"
 #include "psram_app.h"
 #include "lfs_port.h"
 #include "systemMonitor_app.h"
+#include "led_app.h"
 #include "lptim.h"
 
 spi_flash_t flash_32mb = {0};
 
-LED_Object_t led_blue;  // PE3 -> TIM3_CH1
-LED_Object_t led_green; // PE4 -> TIM3_CH2
-LED_Object_t led_red;   // PE5 -> TIM3_CH3
 
-RGB_Object_t rgb;
 
 extern lfs_t g_lfs;
 
@@ -98,6 +95,16 @@ void HardwareInitTask(void *argument)
         (HAL_GPIO_ReadPin(POWER_IN_5V_GPIO_Port, POWER_IN_5V_Pin) == GPIO_PIN_RESET) ? 1U : 0U;
     g_ui.battery.percent = 0U;
 
+    /* Post initial power/charging UI events so popups appear at boot. */
+    if (g_ui.battery.batterypower)
+    {
+        (void)OLED_UI_PostEvent(UI_EVT_POWERIN, "HwInit");
+    }
+    if (g_ui.battery.is_charging)
+    {
+        (void)OLED_UI_PostEvent(UI_EVT_BATTERY_CHARGING, "HwInit");
+    }
+
     log_init(&huart2);
     log_printf("log init done.\n");
 
@@ -106,7 +113,9 @@ void HardwareInitTask(void *argument)
     LED_Driver_Init(&led_green, LED_G_GPIO_Port, LED_G_Pin, &htim2, TIM_CHANNEL_2, 1);
 
     RGB_Init(&rgb, &led_red, &led_green, &led_blue);
+
     RGB_SendCmd(&rgb, RGB_EFFECT_RAINBOW, 5000, 0, 0, 0);
+    
     log_printf("led init done.\n");
 
     uart_dma_init(&uart1_admin, &huart1, u1_dma_buf, UART_Transmit_DMA_RX_SIZE, u1_rb_buf, UART_Transmit_LWRB_SIZE);
@@ -134,7 +143,7 @@ void HardwareInitTask(void *argument)
     APP_Sensors_Init();
     UserMonitor_Init();
     LPTIM_Start1Hz();
-    LPTIM_SetQuoteInterval(180);
+    LPTIM_SetQuoteInterval(300);
     LPTIM_Bulu_Disonnect(300U);
     LPTIM_Music_Stop(180U);
     g_weather_module.first_sync_done = 0U;

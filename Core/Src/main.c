@@ -37,6 +37,7 @@
 #include "oled_ui.h"
 #include "systemMonitor_app.h"
 #include "data_app.h"
+#include "led_app.h"
 #include "log.h"
 /* USER CODE END Includes */
 
@@ -74,7 +75,7 @@ static void Sleep_DisableStopWakeIrqs(void)
   HAL_NVIC_DisableIRQ(DMA1_Channel5_IRQn);
   HAL_NVIC_DisableIRQ(I2C2_EV_IRQn);
   HAL_NVIC_DisableIRQ(I2C2_ER_IRQn);
-  HAL_NVIC_DisableIRQ(TIM7_IRQn);
+  // HAL_NVIC_DisableIRQ(TIM7_IRQn);
 
   NVIC_ClearPendingIRQ(USART1_IRQn);
   NVIC_ClearPendingIRQ(USART3_IRQn);
@@ -83,7 +84,7 @@ static void Sleep_DisableStopWakeIrqs(void)
   NVIC_ClearPendingIRQ(DMA1_Channel5_IRQn);
   NVIC_ClearPendingIRQ(I2C2_EV_IRQn);
   NVIC_ClearPendingIRQ(I2C2_ER_IRQn);
-  NVIC_ClearPendingIRQ(TIM7_IRQn);
+  // NVIC_ClearPendingIRQ(TIM7_IRQn);
 }
 
 static void Sleep_EnableRunIrqs(void)
@@ -140,6 +141,11 @@ static void WakeRuntimeTasks(uint8_t wake_display)
   if (wake_display)
   {
     (void)OLED_UI_PostStateEvent(UI_EVT_SHOW_ON, "WakeRuntime");
+    if (LED_cmd_queue != NULL)
+     {
+        LED_EVT_t evt = LED_EVT_BREATH_GREEN;
+      xQueueSend(LED_cmd_queue, &evt, 0);
+     } 
   }
 }
 

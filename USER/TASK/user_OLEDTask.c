@@ -25,8 +25,9 @@ void OLEDTask(void *arg)
     /* Leave a startup window for hardware init so OLED/UI is ready first. */
     vTaskDelay(pdMS_TO_TICKS(500));
 
-    /* Seed an initial battery state to avoid a blank battery area on boot. */
-    OLED_UI_SetBattery(60, 0);
+    /* Seed an initial battery percent to avoid a blank battery area on boot.
+     * is_charging/batterypower are already set by HardwareInitTask from GPIO. */
+    g_ui.battery.percent = 60;
 
     while (1)
     {

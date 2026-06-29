@@ -198,7 +198,6 @@ void UI_Widget_DrawCenteredWeatherStr(u8g2_t *u8g2, int16_t x, int16_t y, uint8_
 void UI_Widget_DrawStatusBattery(u8g2_t *u8g2, int16_t x, int16_t y, uint8_t pct, uint8_t charging)
 {
     uint8_t fill;
-    uint8_t anim;
     uint8_t body_w = 20U;
     uint8_t body_h = 10U;
     uint8_t cap_w = 2U;
@@ -216,8 +215,10 @@ void UI_Widget_DrawStatusBattery(u8g2_t *u8g2, int16_t x, int16_t y, uint8_t pct
 
     if (charging)
     {
-        anim = (uint8_t)((xTaskGetTickCount() / 120U) % (body_w - 3U));
-        fill = (anim > fill) ? anim : fill;
+        uint32_t period_ms = 3000U;
+        uint32_t elapsed = xTaskGetTickCount() % pdMS_TO_TICKS(period_ms);
+        uint16_t fill_max = (uint16_t)(body_w - 4U) * pct / 100U;
+        fill = (uint8_t)((uint32_t)fill_max * elapsed / pdMS_TO_TICKS(period_ms));
     }
 
     u8g2_DrawBox(u8g2, x + 2, y + 2, fill, body_h - 4U);

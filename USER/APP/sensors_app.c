@@ -4,7 +4,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "eeprom_app.h"
-
+#include "log.h"
 /*
  * 传感器应用层。
  * 当前只封装运动模块的初始化和双缓冲刷新，方便上层直接读稳定数据。
@@ -183,10 +183,17 @@ void Update_Battery(battery_module_t *m)
     float soc, voltage;
 
     if (max17048_get_soc(&m->ctx, &soc) == 0)
+    {
+        if (soc < 0.0f)
+            soc = 0.0f;
+        else if (soc > 100.0f)
+            soc = 100.0f;
         m->soc = soc;
+    }
 
     if (max17048_get_vcell(&m->ctx, &voltage) == 0)
         m->voltage = voltage / 1000.0f;
+  log_printf("voltage: %f, soc: %f", m->voltage, m->soc);
 }
 
 /**

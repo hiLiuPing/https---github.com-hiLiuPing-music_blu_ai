@@ -909,7 +909,7 @@ void UI_Widget_DrawRegionTempNow(u8g2_t *u8g2, int16_t x, int16_t y, uint8_t w, 
 
     u8g2_SetFont(u8g2, u8g2_font_5x8_tf);
     snprintf(buf, sizeof(buf), "%dC", UI_Widget_RoundFloatToInt(g_sensors_environment.temp));
-    UI_Widget_DrawCenteredStr(u8g2, x, y + 10, w, "TEMP");
+    UI_Widget_DrawCenteredStr(u8g2, x, y + 10, w, "NOW");
     UI_Widget_DrawCenteredWeatherStr(u8g2, x, y + 27, w, buf);
 }
 
@@ -976,7 +976,7 @@ void UI_Widget_DrawRegionHumidityNow(u8g2_t *u8g2, int16_t x, int16_t y, uint8_t
     char buf[12];
     (void)h;
     u8g2_SetFont(u8g2, u8g2_font_5x8_tf);
-    UI_Widget_DrawCenteredStr(u8g2, x, y + 10, w, "HUM");
+    UI_Widget_DrawCenteredStr(u8g2, x, y + 10, w, "NOW");
     snprintf(buf, sizeof(buf), "%d%%", UI_Widget_LocalHumidityPercent());
     UI_Widget_DrawCenteredWeatherStr(u8g2, x, y + 27, 32, buf);
 }

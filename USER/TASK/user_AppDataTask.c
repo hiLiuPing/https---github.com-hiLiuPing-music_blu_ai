@@ -18,6 +18,9 @@ extern SemaphoreHandle_t xAppDataTaskWakeSemaphore;
 extern volatile UI_Global_t g_ui;
 
 #define APPDATA_QUOTE_WAKE_SETTLE_MS      200U
+#define APPDATA_LOW_BATTERY_COOLDOWN_MS   (180U * 1000U)
+
+static TickType_t s_last_low_battery_tick = 0U;
 /*
  * Application data task.
  * Runs fast when the OLED is on, and slows down when the panel is off.
@@ -36,10 +39,6 @@ void AppDataTask(void *argument)
     log_printf("[AppData] quote timer started\r\n");
 
 
-        //    if (xAppDataTaskWakeSemaphore != NULL)
-        // {
-        //     xSemaphoreGive(xAppDataTaskWakeSemaphore);
-        // }
 
     for (;;)
     {
@@ -87,6 +86,27 @@ void AppDataTask(void *argument)
             Update_Env(&g_sensors_environment);
             Update_Battery(&g_sensors_battery);
 
+            /* 同步 UI 电池百分比 */
+            {
+                float s = g_sensors_battery.soc;
+                uint8_t pct;
+
+                if (s < 0.0f) s = 0.0f;
+                else if (s > 100.0f) s = 100.0f;
+                pct = (uint8_t)(s + 0.5f);
+                g_ui.battery.percent = pct;
+            }
+
+            /* 低电量检测：< 30% 且不在充电，180 秒防抖 */
+            if (g_sensors_battery.soc < 30.0f && !g_ui.battery.is_charging)
+            {
+                if ((now - s_last_low_battery_tick) >= pdMS_TO_TICKS(APPDATA_LOW_BATTERY_COOLDOWN_MS))
+                {
+                    s_last_low_battery_tick = now;
+                    (void)OLED_UI_PostEvent(UI_EVT_BATTERY_LOW, "AppData");
+                }
+            }
+              
             if (g_ui.oled_showing != 0U)
             {
                 RTC_ReadToBuffer();
@@ -99,6 +119,8 @@ void AppDataTask(void *argument)
         {
             g_key_idle_timeout = 0;
             // System_PowerOff();
+            music_send_cmd(CMD_POWER_OFF);
+            vTaskDelay(pdMS_TO_TICKS(50));
             music_send_cmd(CMD_SYSTEM_POWER_OFF);
             (void)OLED_UI_PostEvent(UI_EVT_KEY_TIMEOUT, "AppData");
             log_printf("Key idle timeout.\r\n");

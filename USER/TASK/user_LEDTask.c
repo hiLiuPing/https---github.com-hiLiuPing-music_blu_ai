@@ -6,7 +6,7 @@
 #include "oled_ui.h"
 #include "FreeRTOS.h"
 #include "queue.h"
-#include "rgb_led.h"
+#include "led_app.h"
 #include "log.h"
 
 /*
@@ -26,10 +26,7 @@ void LEDTask(void *pvParameters)
 
     TickType_t led_scan_tick_count = xTaskGetTickCount();
 
-        //    if (xLedTaskWakeSemaphore != NULL)
-        // {
-        //     xSemaphoreGive(xLedTaskWakeSemaphore);
-        // }
+    LED_EVT_t cmd;
     while (1)
     {
 
@@ -39,9 +36,11 @@ void LEDTask(void *pvParameters)
             
             // 无限期等待信号量，直到被外部中断或系统控制逻辑唤醒
             xSemaphoreTake(xLedTaskWakeSemaphore, portMAX_DELAY);
-            
-            // log_printf("ledTask Woken Up!\r\n");
 
+        }
+       if (xQueueReceive(LED_cmd_queue, &cmd, 0) == pdPASS)
+        {
+            LED_CMD_OnEvent(cmd);
         }
         LED_Driver_Update();
         RGB_Update(&rgb, pdMS_TO_TICKS(10));

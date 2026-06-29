@@ -9,6 +9,7 @@
 #include "key.h"
 #include "music_app.h"
 #include "data_app.h"
+#include "led_app.h"
 #include "oled_ui.h"
 #include "systemMonitor_app.h"
 //gui
@@ -43,10 +44,11 @@ TaskHandle_t AppDataTaskHandle;
 TaskHandle_t WeatherSyncTaskHandle = NULL;
 
 // 输入与音乐控制消息队列。
-QueueHandle_t Key_Power_Queue = NULL;
+QueueHandle_t Key_Power_queue = NULL;
 QueueHandle_t Key_Music_queue = NULL;
 QueueHandle_t music_cmd_queue = NULL;
 QueueHandle_t OLED_UI_queue = NULL;
+QueueHandle_t LED_cmd_queue = NULL;
 
 // 1. 定义信号量句柄（全局变量，方便其他任务或中断函数 extern 引用）
 SemaphoreHandle_t xKeyScanTaskWakeSemaphore = NULL;
@@ -76,7 +78,7 @@ void Key_QueueSet_Init(void)
     xKeyQueueSet = xQueueCreateSet(10); 
     
     // 3. 将现有的两个队列添加进集合中
-    xQueueAddToSet(Key_Power_Queue, xKeyQueueSet);
+    xQueueAddToSet(Key_Power_queue, xKeyQueueSet);
     xQueueAddToSet(Key_Music_queue, xKeyQueueSet);
 }
 
@@ -99,10 +101,12 @@ void User_Tasks_Init(void)
     xTransmitTaskWakeSemaphore = xSemaphoreCreateBinary();
     xWeatherSyncTaskWakeSemaphore = xSemaphoreCreateBinary();
 
-    Key_Power_Queue = xQueueCreate(5, sizeof(key_event_t));
+    Key_Power_queue = xQueueCreate(5, sizeof(key_event_t));
     Key_Music_queue = xQueueCreate(5, sizeof(TiltKey_t));
     music_cmd_queue = xQueueCreate(5, sizeof(MusicCtrlCmd));
     OLED_UI_queue = xQueueCreate(10, sizeof(UI_Event_t));
+    LED_cmd_queue = xQueueCreate(5, sizeof(LED_EVT_t));
+
     Key_QueueSet_Init();
 
     /* add threads, ... */
