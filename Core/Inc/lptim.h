@@ -55,6 +55,7 @@ extern volatile uint8_t g_key_idle_timeout;
 extern volatile uint8_t g_bulu_timeout;
 extern volatile uint8_t g_music_timeout;
 extern volatile uint8_t g_quote_ready;
+extern volatile uint8_t g_connect_music_changed;
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

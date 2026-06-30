@@ -113,6 +113,12 @@ void UI_Msg_HandleEvent(UI_Event_t event)
     case UI_EVT_BULU_TIMEOUT:
         UI_Popup_Show(Draw_SystemMsgPopup, "BULU TIMEOUT", 500);
         break;
+    case UI_EVT_MUSIC_ON:
+        UI_Popup_Show(Draw_SystemMsgPopup, "MUSIC ON", 500);
+        break;
+    case UI_EVT_MUSIC_OFF:
+        UI_Popup_Show(Draw_SystemMsgPopup, "MUSIC OFF", 500);
+        break;
     case UI_EVT_MUSIC_TIMEOUT:
         UI_Popup_Show(Draw_SystemMsgPopup, "MUSIC TIMEOUT", 500);
         break;

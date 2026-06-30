@@ -1,6 +1,7 @@
 /* Private includes -----------------------------------------------------------*/
 // includes
 #include "user_TasksInit.h"
+#include "user_KeyTask.h"
 #include "key.h"
 #include "FreeRTOS.h"
 #include "queue.h"
@@ -24,27 +25,16 @@ void KeyTask(void *argument)
     key_event_t key_event;
     TiltKey_t key;
 
-    static uint8_t last_ble_key = 0;
-    static uint8_t last_music_key = 0;
     static uint32_t tilt_enable_timer = 0;
-
-    last_ble_key = HAL_GPIO_ReadPin(CONNECT_GPIO_Port, CONNECT_Pin);
-    last_music_key = HAL_GPIO_ReadPin(MUSIC_ON_GPIO_Port, MUSIC_ON_Pin);
 
     while (1)
     {
         if (!g_ui.sys_running)
         {
             xSemaphoreTake(xKeyScanTaskWakeSemaphore, portMAX_DELAY);
-
-            last_ble_key = HAL_GPIO_ReadPin(CONNECT_GPIO_Port, CONNECT_Pin);
-            last_music_key = HAL_GPIO_ReadPin(MUSIC_ON_GPIO_Port, MUSIC_ON_Pin);
         }
 
         {
-            uint8_t cur_ble = HAL_GPIO_ReadPin(CONNECT_GPIO_Port, CONNECT_Pin);
-            uint8_t cur_music = HAL_GPIO_ReadPin(MUSIC_ON_GPIO_Port, MUSIC_ON_Pin);
-
             if (Key_Scan(&key_event))
             {
                 xQueueSend(Key_Power_queue, &key_event, portMAX_DELAY);
@@ -66,20 +56,6 @@ void KeyTask(void *argument)
             key = FallDetect_Check(&g_sensors_motion);
             if (key == MSG_FALL_DOWN)
             {
-                xQueueSend(Key_Music_queue, &key, portMAX_DELAY);
-            }
-
-            if (cur_ble != last_ble_key)
-            {
-                last_ble_key = cur_ble;
-                key = (cur_ble == 1U) ? MSG_BLUETOOTH_CONNECT : MSG_BLUETOOTH_DISCONNECT;
-                xQueueSend(Key_Music_queue, &key, portMAX_DELAY);
-            }
-
-            if (cur_music != last_music_key)
-            {
-                last_music_key = cur_music;
-                key = (cur_music == 1U) ? MSG_MUSIC_PLAY : MSG_MUSIC_STOP;
                 xQueueSend(Key_Music_queue, &key, portMAX_DELAY);
             }
         }

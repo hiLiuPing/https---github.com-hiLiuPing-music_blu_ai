@@ -128,7 +128,8 @@ void AppDataTask(void *argument)
         if (g_bulu_timeout)
         {
             g_bulu_timeout = 0;
-            music_send_cmd(CMD_POWER_OFF);
+            // music_send_cmd(CMD_POWER_OFF);
+            music_send_cmd(CMD_SYSTEM_POWER_OFF);
             (void)OLED_UI_PostEvent(UI_EVT_BULU_TIMEOUT, "AppData");
             log_printf("BULU timeout.\r\n");
         }

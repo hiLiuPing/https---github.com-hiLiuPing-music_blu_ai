@@ -144,7 +144,7 @@ void HardwareInitTask(void *argument)
     UserMonitor_Init();
     LPTIM_Start1Hz();
     LPTIM_SetQuoteInterval(300);
-    LPTIM_Bulu_Disonnect(300U);
+    LPTIM_Bulu_Disonnect(600U);
     LPTIM_Music_Stop(180U);
     g_weather_module.first_sync_done = 0U;
     log_printf("[Weather] boot sync required\r\n");

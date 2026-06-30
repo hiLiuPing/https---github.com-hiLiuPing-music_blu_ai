@@ -142,7 +142,7 @@ void KeyManllegeTask(void *pvParameters)
                     g_music_ble_state.ble_connected = 0;
                     if (g_music_ble_state.ble_ever_connected)
                     {
-                        LPTIM_Bulu_Disonnect(300U);
+                        LPTIM_Bulu_Disonnect(600U);
                     }
                     if (LED_cmd_queue != NULL)
                     {
@@ -161,6 +161,7 @@ void KeyManllegeTask(void *pvParameters)
                     g_music_ble_state.music_played = 1;
                     g_music_ble_state.music_ever_played = 1;
                     LPTIM_Music_Play();
+                    SEND_UI_EVT(UI_EVT_MUSIC_ON);
                     if (LED_cmd_queue != NULL)
                     {
                         led_t = LED_EVT_BREATH_GREEN;
@@ -180,6 +181,7 @@ void KeyManllegeTask(void *pvParameters)
                     {
                         LPTIM_Music_Stop(180U);
                     }
+                    SEND_UI_EVT(UI_EVT_MUSIC_OFF);
                     /*
                      * LED 与页面联动策略：
                      * 1. 蓝牙未连接时，红灯闪烁并回首页。

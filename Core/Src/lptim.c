@@ -23,6 +23,8 @@
 /* USER CODE BEGIN 0 */
 #include <string.h>
 #include "user_TasksInit.h"
+#include "data_app.h"
+#include "ui_data.h"
 /* USER CODE END 0 */
 
 LPTIM_HandleTypeDef hlptim1;
@@ -118,6 +120,7 @@ volatile uint8_t g_key_idle_timeout = 0;
 volatile uint8_t g_bulu_timeout = 0;
 volatile uint8_t g_music_timeout = 0;
 volatile uint8_t g_quote_ready = 0;
+volatile uint8_t g_connect_music_changed = 0;
 
 typedef struct {
     uint32_t sec;
@@ -260,6 +263,49 @@ void LPTIM_OnTick(void)
             vTaskNotifyGiveFromISR(AppDataTaskHandle, &xTaskWoken);
         }
         portYIELD_FROM_ISR(xTaskWoken);
+    }
+
+    /* ── CONNECT / MUSIC_ON 引脚状态检测 ── */
+    {
+        static uint8_t last_ble = 0xFF;
+        static uint8_t last_music = 0xFF;
+        uint8_t cur_ble = HAL_GPIO_ReadPin(CONNECT_GPIO_Port, CONNECT_Pin);
+        uint8_t cur_music = HAL_GPIO_ReadPin(MUSIC_ON_GPIO_Port, MUSIC_ON_Pin);
+
+        if (last_ble == 0xFF) last_ble = cur_ble;
+        if (last_music == 0xFF) last_music = cur_music;
+
+        if (cur_ble != last_ble)
+        {
+            last_ble = cur_ble;
+            if (Key_Music_queue != NULL)
+            {
+                TiltKey_t key = cur_ble ? MSG_BLUETOOTH_CONNECT : MSG_BLUETOOTH_DISCONNECT;
+                BaseType_t xWoken = pdFALSE;
+                xQueueSendFromISR(Key_Music_queue, &key, &xWoken);
+                if (!g_ui.sys_running)
+                {
+                    g_connect_music_changed = 1;
+                }
+                portYIELD_FROM_ISR(xWoken);
+            }
+        }
+
+        if (cur_music != last_music)
+        {
+            last_music = cur_music;
+            if (Key_Music_queue != NULL)
+            {
+                TiltKey_t key = cur_music ? MSG_MUSIC_PLAY : MSG_MUSIC_STOP;
+                BaseType_t xWoken = pdFALSE;
+                xQueueSendFromISR(Key_Music_queue, &key, &xWoken);
+                if (!g_ui.sys_running)
+                {
+                    g_connect_music_changed = 1;
+                }
+                portYIELD_FROM_ISR(xWoken);
+            }
+        }
     }
 }
 
