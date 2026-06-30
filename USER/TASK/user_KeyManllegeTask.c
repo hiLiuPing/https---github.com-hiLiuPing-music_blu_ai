@@ -293,6 +293,10 @@ void KeyManllegeTask(void *pvParameters)
                     g_ui.battery.is_charging =
                         (HAL_GPIO_ReadPin(BAT_CHG_GPIO_Port, BAT_CHG_Pin) == GPIO_PIN_RESET) ? 1U : 0U;
                     SEND_UI_EVT(UI_EVT_POWERIN);
+                    if (g_ui.battery.is_charging)
+                    {
+                        SEND_UI_EVT(UI_EVT_BATTERY_CHARGING);
+                    }
                     break;
 
                 case MSG_PWER_OUT:

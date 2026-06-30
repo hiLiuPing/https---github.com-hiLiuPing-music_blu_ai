@@ -37,6 +37,7 @@ static uint8_t Weather_RunSyncWithRetry(const char *success_log,
         if (Weather_HasCompletedSync())
         {
             log_printf(success_log, retry + 1U);
+             (void)OLED_UI_PostEvent(UI_EVT_WEATHER_TIME_SYNC_OK, "Weather");
             return 1U;
         }
     }
@@ -99,6 +100,7 @@ void WeatherSyncTask(void *arg)
                                          "[Weather] sync total timeout after 15 retries\r\n") != 0U)
             {
                 log_printf("[Weather] sync done\r\n");
+               
             }
         }
          Weather_PowerOff();

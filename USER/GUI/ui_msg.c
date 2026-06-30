@@ -34,6 +34,8 @@ void UI_Msg_HandleEvent(UI_Event_t event)
         case UI_EVT_BATTERY_CHARGING:
         case UI_EVT_POWEROUT:
         case UI_EVT_POWERIN:
+        case UI_EVT_WEATHER_TIME_SYNC:
+        case UI_EVT_WEATHER_TIME_SYNC_OK:
             break;
         default:
             return;
@@ -101,6 +103,9 @@ void UI_Msg_HandleEvent(UI_Event_t event)
         break;
     case UI_EVT_WEATHER_TIME_SYNC:
         UI_Popup_Show(Draw_SystemMsgPopup, "SYNC WEATHER/TIME", 800);
+        break;
+    case UI_EVT_WEATHER_TIME_SYNC_OK:
+        UI_Popup_Show(Draw_SystemMsgPopup, "TIME WEATHER OK", 800);
         break;
     case UI_EVT_KEY_TIMEOUT:
         UI_Popup_Show(Draw_SystemMsgPopup, "KEY TIMEOUT", 500);

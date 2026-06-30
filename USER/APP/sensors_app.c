@@ -193,7 +193,7 @@ void Update_Battery(battery_module_t *m)
 
     if (max17048_get_vcell(&m->ctx, &voltage) == 0)
         m->voltage = voltage / 1000.0f;
-  log_printf("voltage: %f, soc: %f", m->voltage, m->soc);
+//   log_printf("voltage: %f, soc: %f", m->voltage, m->soc);
 }
 
 /**
