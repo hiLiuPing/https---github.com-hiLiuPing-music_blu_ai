@@ -115,7 +115,7 @@ void User_Tasks_Init(void)
     xTaskCreate(MusicTask, "MusicTask", 128, NULL, tskIDLE_PRIORITY + 2, &MusicTaskHandle);
     xTaskCreate(LEDTask, "LEDTask", 128, NULL, tskIDLE_PRIORITY + 2, &LEDTaskHandle);
     xTaskCreate(OLEDTask, "OLEDTask", 320, NULL, tskIDLE_PRIORITY + 2, &OLEDTaskHandle);
-    xTaskCreate(TransmitTask, "TransmitTask", 256, NULL, tskIDLE_PRIORITY + 2, &TransmitTaskHandle);
+    xTaskCreate(TransmitTask, "TransmitTask", 512, NULL, tskIDLE_PRIORITY + 2, &TransmitTaskHandle);
     xTaskCreate(AppDataTask, "AppDataTask", 512, NULL, tskIDLE_PRIORITY + 2, &AppDataTaskHandle);
     xTaskCreate(WeatherSyncTask, "WeatherSync", 192, NULL, tskIDLE_PRIORITY + 1, &WeatherSyncTaskHandle);
     xTaskCreate(KeyManllegeTask, "KeyManllegeTask", 160, NULL, tskIDLE_PRIORITY + 2, &KeyManllegeTaskHandle);

@@ -64,6 +64,7 @@ void KeyManllegeTask(void *pvParameters)
                     }
 
                     // Music_PowerOn();
+                    xTaskNotifyGive(WeatherSyncTaskHandle);
                     log_printf("Key %d Clicked!\n", key_event.id);
                 }
                 else if (key_event.type == KEY_EVT_LONG)

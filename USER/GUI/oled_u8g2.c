@@ -509,12 +509,13 @@ void OLED_WakeUp(void)
 {
     g_oled_debug_stats.wake_count++;
     OLED_DmaRecoverRuntime("wake");
-    OLED_DmaResumeRuntime();
+    OLED_DmaStopRuntime();              /* use blocking I2C until bus is stable */
     NVIC_ClearPendingIRQ(DMA1_Channel4_IRQn);
     NVIC_ClearPendingIRQ(I2C2_EV_IRQn);
     NVIC_ClearPendingIRQ(I2C2_ER_IRQn);
-    u8g2_SetPowerSave(&u8g2, 0);
-    u8g2_SendBuffer(&u8g2);
+    u8g2_SetPowerSave(&u8g2, 0);        /* blocking – !oled_dma_runtime_enabled */
+    u8g2_SendBuffer(&u8g2);             /* blocking */
+    OLED_DmaResumeRuntime();            /* bus stable now, re-enable DMA */
     log_printf("[OLED] wake #%lu\r\n", (unsigned long)g_oled_debug_stats.wake_count);
 }
 

@@ -29,11 +29,6 @@ void TransmitTask(void *arg)
 
     uint8_t ch;
 
-        //    if (xTransmitTaskWakeSemaphore != NULL)
-        // {
-        //     xSemaphoreGive(xTransmitTaskWakeSemaphore);
-        // }
-
 
     for (;;)
     {
