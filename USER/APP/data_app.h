@@ -22,7 +22,6 @@
 #define FALL_TRIG_CNT   5
 
 /* 语录渲染与滚动参数。 */
-#define DATA_APP_QUOTE_MAX_LINES              256U
 #define DATA_APP_QUOTE_RENDER_MAX_GLYPHS      96U
 #define DATA_APP_QUOTE_FONT_W                 16U
 #define DATA_APP_QUOTE_FONT_H                 16U
@@ -40,7 +39,7 @@
 
 #define BUF_NUM 2
 
-#define DATA_APP_QUOTE_FILE_PATH         "/quotes_china.txt"
+#define DATA_APP_QUOTE_FILE_PATH         "/quotes_china.idx"
 #define DATA_APP_QUOTE_FONT_PATH         "/heiti_1_16.bin"
 #define DATA_APP_QUOTE_FONT_BYTES        32U
 #define DATA_APP_QUOTE_ASCII_GLYPHS      96U
@@ -63,6 +62,20 @@
 #define DATA_APP_QUOTE_MIN_DURATION_MS   4000U
 #define DATA_APP_QUOTE_MAX_DURATION_MS   6000U
 
+/* 二进制索引文件 quotes_china.idx 结构。 */
+#pragma pack(push, 1)
+typedef struct {
+    uint32_t magic;        /* "QIDX" = 0x58444951 */
+    uint32_t count;        /* 总条数 */
+    uint32_t data_offset;  /* 数据区起始偏移 */
+    uint32_t reserved;     /* 预留 */
+} QIDX_Header_t;
+
+typedef struct {
+    uint32_t offset;       /* 相对于文件开头的偏移 */
+    uint32_t length;       /* UTF-8 字节长度 */
+} QIDX_Item_t;
+#pragma pack(pop)
 
 /* RTC 时间快照。 */
 typedef struct {
@@ -104,12 +117,6 @@ typedef enum {
     MSG_TILT_SHAKE_VERTICAL,
     MSG_TILT_SHAKE_HORIZONTAL,
 } TiltKey_t;
-
-/* LittleFS 语录索引。 */
-typedef struct {
-    uint32_t offset;
-    uint32_t length;
-} DataApp_QuoteLine_t;
 
 /* 待显示语录请求。 */
 typedef struct {

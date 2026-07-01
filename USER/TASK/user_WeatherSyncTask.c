@@ -54,7 +54,7 @@ void WeatherSyncTask(void *arg)
 {
     (void)arg;
 
-    vTaskDelay(pdMS_TO_TICKS(8000));
+    vTaskDelay(pdMS_TO_TICKS(10000));
 
     for (;;)
     {
@@ -92,7 +92,7 @@ void WeatherSyncTask(void *arg)
         g_weather_module.syncing = 1U;
 
         Weather_PowerOn();
-        vTaskDelay(pdMS_TO_TICKS(10000));
+        vTaskDelay(pdMS_TO_TICKS(6000));
 
         if (g_ui.sys_running)
         {

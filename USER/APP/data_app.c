@@ -74,9 +74,9 @@ typedef struct {
     DataApp_QuotePrepared_t pending;
     TickType_t active_start_tick;
     TickType_t last_refresh_check_tick;
-    uint32_t file_size;
     uint16_t line_count;
     uint16_t last_pick;
+    uint32_t data_offset;
     DataApp_QuoteScrollPhase_t active_scroll_phase;
     uint8_t initialized;
     uint8_t cache_loaded;
@@ -87,9 +87,8 @@ typedef struct {
 static void DataApp_QuoteResetRuntime(void);
 static int DataApp_QuoteOpenReadonlyFile(lfs_file_t *file, struct lfs_file_config *cfg, const char *path);
 static void DataApp_QuoteTrimLineBounds(char *buf, uint16_t *start, uint16_t *end);
-static void DataApp_QuoteBuildIndex(void);
+static void DataApp_QuoteLoadIndex(void);
 static uint8_t DataApp_QuoteReadIndexedLine(uint16_t line_index, char *out, size_t out_len);
-static void DataApp_QuoteLoadCache(void);
 static void DataApp_QuoteValidateFontFileOnce(void);
 /* UTF-8 与字模映射工具。 */
 static uint32_t DataApp_QuoteDecodeUtf8(const char **text);
@@ -133,7 +132,6 @@ static time_t time_buf[BUF_NUM];
 static volatile uint8_t time_write_idx = 0;
 static volatile uint8_t time_read_idx  = 1;
 static DataApp_QuoteRuntime_t s_quote_runtime;
-static DataApp_QuoteLine_t s_quote_lines[DATA_APP_QUOTE_MAX_LINES];
 static uint8_t s_quote_file_buf[LFS_CACHE_SIZE];
 static DataApp_QuotePrepared_t s_quote_prepare_scratch;
 
@@ -332,89 +330,61 @@ static void DataApp_QuoteTrimLineBounds(char *buf, uint16_t *start, uint16_t *en
 }
 
 /**
- * @brief  为语录文件建立行索引
+ * @brief  从二进制索引文件加载 Header（按需定位语录）
  * @retval None
  */
-static void DataApp_QuoteBuildIndex(void)
+static void DataApp_QuoteLoadIndex(void)
 {
     lfs_t *lfs = lfs_port_get();
     lfs_file_t file;
     struct lfs_file_config cfg;
-    uint8_t read_buf[64];
+    QIDX_Header_t header;
     lfs_ssize_t read_ret;
-    uint32_t file_pos = 0U;
-    uint32_t line_start = 0U;
-    uint16_t line_count = 0U;
 
-    memset(s_quote_lines, 0, sizeof(s_quote_lines));
-    s_quote_runtime.file_size = 0U;
     s_quote_runtime.line_count = 0U;
+    s_quote_runtime.data_offset = 0U;
     s_quote_runtime.cache_loaded = 0U;
 
     memset(&cfg, 0, sizeof(cfg));
     cfg.buffer = s_quote_file_buf;
 
     lfs_port_lock();
-    log_printf("[DataApp] quote cache open\r\n");
+    log_printf("[DataApp] quote idx open\r\n");
     if (DataApp_QuoteOpenReadonlyFile(&file, &cfg, DATA_APP_QUOTE_FILE_PATH) < 0)
     {
         lfs_port_unlock();
-        log_printf("[DataApp] quote file open failed\r\n");
+        log_printf("[DataApp] quote idx file open failed\r\n");
         return;
     }
 
-    while ((read_ret = lfs_file_read(lfs, &file, read_buf, sizeof(read_buf))) > 0)
-    {
-        uint8_t i;
-
-        for (i = 0U; i < (uint8_t)read_ret; i++)
-        {
-            if (read_buf[i] == '\n')
-            {
-                uint32_t raw_end = file_pos;
-
-                if (raw_end > line_start && line_count < DATA_APP_QUOTE_MAX_LINES)
-                {
-                    s_quote_lines[line_count].offset = line_start;
-                    s_quote_lines[line_count].length = (raw_end - line_start);
-                    line_count++;
-                }
-
-                line_start = file_pos + 1U;
-            }
-
-            file_pos++;
-        }
-    }
-
-    if (file_pos > line_start && line_count < DATA_APP_QUOTE_MAX_LINES)
-    {
-        s_quote_lines[line_count].offset = line_start;
-        s_quote_lines[line_count].length = (file_pos - line_start);
-        line_count++;
-    }
-
+    read_ret = lfs_file_read(lfs, &file, (uint8_t *)&header, sizeof(header));
     (void)lfs_file_close(lfs, &file);
     lfs_port_unlock();
-    s_quote_runtime.file_size = file_pos;
-    s_quote_runtime.line_count = line_count;
+
+    if (read_ret != (lfs_ssize_t)sizeof(header))
+    {
+        log_printf("[DataApp] quote idx header read failed (%ld)\r\n", (long)read_ret);
+        return;
+    }
+
+    if (header.magic != 0x58444951U)
+    {
+        log_printf("[DataApp] quote idx bad magic=0x%08lX\r\n",
+                   (unsigned long)header.magic);
+        return;
+    }
+
+    s_quote_runtime.line_count = (uint16_t)header.count;
+    s_quote_runtime.data_offset = header.data_offset;
     s_quote_runtime.cache_loaded = 1U;
     s_quote_runtime.last_pick = UINT16_MAX;
     s_quote_runtime.last_refresh_check_tick = xTaskGetTickCount();
 
-    log_printf("[DataApp] quote cache load done size=%lu lines=%u\r\n",
-               (unsigned long)s_quote_runtime.file_size,
-               (unsigned int)s_quote_runtime.line_count);
+    log_printf("[DataApp] quote idx load done count=%lu data_offset=%lu\r\n",
+               (unsigned long)s_quote_runtime.line_count,
+               (unsigned long)s_quote_runtime.data_offset);
 }
 
-/**
- * @brief  从 LittleFS 读取语录文件到内存缓存
- * @retval None
- */
-static void DataApp_QuoteLoadCache(void)
-{
-    DataApp_QuoteBuildIndex();
-}
 
 static uint32_t DataApp_QuoteDecodeUtf8(const char **text)
 {
@@ -528,25 +498,19 @@ static uint8_t DataApp_QuoteReadIndexedLine(uint16_t line_index, char *out, size
     lfs_file_t file;
     struct lfs_file_config cfg;
     uint8_t read_buf[64];
-    DataApp_QuoteLine_t line;
+    QIDX_Item_t item;
     uint32_t remaining;
     size_t write_pos = 0U;
     lfs_soff_t seek_ret;
     lfs_ssize_t read_ret;
+    uint32_t item_offset;
 
     if (out == NULL || out_len == 0U || line_index >= s_quote_runtime.line_count)
     {
         return 0U;
     }
 
-    line = s_quote_lines[line_index];
-    if (line.length == 0U)
-    {
-        return 0U;
-    }
-
     memset(out, 0, out_len);
-
     memset(&cfg, 0, sizeof(cfg));
     cfg.buffer = s_quote_file_buf;
 
@@ -554,11 +518,13 @@ static uint8_t DataApp_QuoteReadIndexedLine(uint16_t line_index, char *out, size
     if (DataApp_QuoteOpenReadonlyFile(&file, &cfg, DATA_APP_QUOTE_FILE_PATH) < 0)
     {
         lfs_port_unlock();
-        log_printf("[DataApp] quote file reopen failed\r\n");
+        log_printf("[DataApp] quote idx reopen failed\r\n");
         return 0U;
     }
 
-    seek_ret = lfs_file_seek(lfs, &file, (lfs_soff_t)line.offset, LFS_SEEK_SET);
+    /* 定位到第 line_index 条 Item：Header + index × sizeof(Item) */
+    item_offset = (uint32_t)sizeof(QIDX_Header_t) + (uint32_t)line_index * (uint32_t)sizeof(QIDX_Item_t);
+    seek_ret = lfs_file_seek(lfs, &file, (lfs_soff_t)item_offset, LFS_SEEK_SET);
     if (seek_ret < 0)
     {
         (void)lfs_file_close(lfs, &file);
@@ -566,7 +532,24 @@ static uint8_t DataApp_QuoteReadIndexedLine(uint16_t line_index, char *out, size
         return 0U;
     }
 
-    remaining = line.length;
+    read_ret = lfs_file_read(lfs, &file, (uint8_t *)&item, sizeof(item));
+    if (read_ret != (lfs_ssize_t)sizeof(item))
+    {
+        (void)lfs_file_close(lfs, &file);
+        lfs_port_unlock();
+        return 0U;
+    }
+
+    /* 定位到 Item.offset 指向的文本数据 */
+    seek_ret = lfs_file_seek(lfs, &file, (lfs_soff_t)item.offset, LFS_SEEK_SET);
+    if (seek_ret < 0)
+    {
+        (void)lfs_file_close(lfs, &file);
+        lfs_port_unlock();
+        return 0U;
+    }
+
+    remaining = item.length;
     while (remaining > 0U && write_pos < (out_len - 1U))
     {
         lfs_size_t chunk = (remaining > sizeof(read_buf)) ? sizeof(read_buf) : (lfs_size_t)remaining;
@@ -598,7 +581,8 @@ static uint8_t DataApp_QuoteReadIndexedLine(uint16_t line_index, char *out, size
     lfs_port_unlock();
     out[write_pos] = '\0';
 
-    if (line.offset == 0U &&
+    /* 防御性 BOM 剥离 */
+    if (item.offset == 0U &&
         write_pos >= 3U &&
         (uint8_t)out[0] == 0xEFU &&
         (uint8_t)out[1] == 0xBBU &&
@@ -1110,7 +1094,7 @@ void DataApp_Init(void)
 
     // 资源固化，开机即加载语录索引和字库，无需运行时预热。
     DataApp_QuoteValidateFontFileOnce();
-    DataApp_QuoteLoadCache();
+    DataApp_QuoteLoadIndex();
 }
 
 /**
@@ -1126,13 +1110,12 @@ void DataApp_QuoteInvalidate(void)
     }
 
     DataApp_Lock();
-    memset(s_quote_lines, 0, sizeof(s_quote_lines));
     memset(&s_quote_runtime.active, 0, sizeof(s_quote_runtime.active));
     memset(&s_quote_runtime.pending, 0, sizeof(s_quote_runtime.pending));
     s_quote_runtime.active_start_tick = 0U;
     s_quote_runtime.last_refresh_check_tick = 0U;
-    s_quote_runtime.file_size = 0U;
     s_quote_runtime.line_count = 0U;
+    s_quote_runtime.data_offset = 0U;
     s_quote_runtime.cache_loaded = 0U;
     s_quote_runtime.last_pick = UINT16_MAX;
     s_quote_runtime.font_checked = 0U;

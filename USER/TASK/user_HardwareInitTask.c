@@ -3,6 +3,7 @@
 #include "tim.h"
 #include "i2c.h"
 #include "usart.h"
+#include "main.h"
 #include "user_TasksInit.h"
 
 #include "key.h"
@@ -143,7 +144,7 @@ void HardwareInitTask(void *argument)
     APP_Sensors_Init();
     UserMonitor_Init();
     LPTIM_Start1Hz();
-    LPTIM_SetQuoteInterval(300);
+    LPTIM_SetQuoteInterval(40);
     LPTIM_Bulu_Disonnect(600U);
     LPTIM_Music_Stop(180U);
     g_weather_module.first_sync_done = 0U;
