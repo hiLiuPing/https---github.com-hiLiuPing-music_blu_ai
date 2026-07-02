@@ -223,22 +223,17 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-MX_GPIO_Init();
-  MX_DMA_Init();          // 1. 确保 DMA 总线时钟和全局中断最先开启
-
-  /* ==================== 优先初始化核心串口和通信外设 ==================== */
-  MX_USART1_UART_Init();  // 2. 紧跟 DMA 之后初始化，确保通道和 DMAMUX 映射绝对成功
-  MX_USART2_UART_Init(); 
-
-  /* ==================== 其它外设初始化 ==================== */
+  MX_GPIO_Init();
+  MX_DMA_Init();
   MX_I2C1_Init();
   MX_I2C2_Init();
   MX_QUADSPI_Init();
   MX_SPI1_Init();
+  MX_USART2_UART_Init();
   MX_LPTIM1_Init();
   MX_TIM2_Init();
+  MX_USART1_UART_Init();
   MX_RTC_Init();
-
   /* USER CODE BEGIN 2 */
   // 在这里面再去调用你的 uart_dma_init(...) 开启 DMA 接收
   User_Tasks_Init();
