@@ -10,6 +10,10 @@
 #define UART_LWRB_SIZE        4096
 #define UART_Transmit_DMA_RX_SIZE      512
 #define UART_Transmit_LWRB_SIZE        1024
+
+// extern  uint32_t number;
+// extern uint32_t numberB;
+
 typedef struct {
     UART_HandleTypeDef* huart;      // 串口句柄 (huart1, huart3等)
     lwrb_t uart_rb;                // 环形缓冲区结构体

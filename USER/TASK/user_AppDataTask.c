@@ -14,6 +14,10 @@
 #include "log.h"
 #include "music_app.h"
 #include "systemMonitor_app.h"
+
+
+// #include "uart_dma.h"
+
 extern SemaphoreHandle_t xAppDataTaskWakeSemaphore;
 extern volatile UI_Global_t g_ui;
 
@@ -21,6 +25,7 @@ extern volatile UI_Global_t g_ui;
 #define APPDATA_LOW_BATTERY_COOLDOWN_MS   (180U * 1000U)
 
 static TickType_t s_last_low_battery_tick = 0U;
+
 /*
  * Application data task.
  * Runs fast when the OLED is on, and slows down when the panel is off.
@@ -82,10 +87,11 @@ void AppDataTask(void *argument)
 
         if ((now - last_1s_tick) >= ms_100)
         {
+          
             last_1s_tick += ms_100;
             Update_Env(&g_sensors_environment);
             Update_Battery(&g_sensors_battery);
-
+            // log_printf("number==%d,numberB==%d",number,numberB);
             /* 同步 UI 电池百分比 */
             {
                 float s = g_sensors_battery.soc;

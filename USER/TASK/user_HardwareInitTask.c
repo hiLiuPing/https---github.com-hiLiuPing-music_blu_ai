@@ -118,9 +118,8 @@ void HardwareInitTask(void *argument)
     RGB_SendCmd(&rgb, RGB_EFFECT_RAINBOW, 5000, 0, 0, 0);
     
     log_printf("led init done.\n");
-
-    uart_dma_init(&uart1_admin, &huart1, u1_dma_buf, UART_Transmit_DMA_RX_SIZE, u1_rb_buf, UART_Transmit_LWRB_SIZE);
-    log_printf("uart dma init done.\n");
+    Weather_PowerOn();
+    // 开启esp32电源，确保天气模块上电
 
     Key_Init();
     log_printf("key init done.\n");
@@ -138,13 +137,14 @@ void HardwareInitTask(void *argument)
     log_printf("flash init done.\n");
     DataApp_Init();
     log_printf("data app init done.\n");
-    Weather_PowerOn();
-    // 开启esp32
+       uart_dma_init(&uart1_admin, &huart1, u1_dma_buf, UART_Transmit_DMA_RX_SIZE, u1_rb_buf, UART_Transmit_LWRB_SIZE);
+    log_printf("uart dma init done.\n");
+
     Time_Init();
     APP_Sensors_Init();
     UserMonitor_Init();
     LPTIM_Start1Hz();
-    LPTIM_SetQuoteInterval(40);
+    LPTIM_SetQuoteInterval(300);
     LPTIM_Bulu_Disonnect(600U);
     LPTIM_Music_Stop(180U);
     g_weather_module.first_sync_done = 0U;

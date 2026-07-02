@@ -1,6 +1,10 @@
 #include "uart_dma.h"
 #include <string.h>
 
+//  uint32_t number = 0;
+//  uint32_t numberB = 0;
+
+
 void uart_dma_init(uart_dma_t* ctrl, UART_HandleTypeDef* huart, uint8_t* dma_buf, uint32_t dma_size, uint8_t* rb_buf, uint32_t rb_size)
 {
     ctrl->huart = huart;
@@ -9,13 +13,15 @@ void uart_dma_init(uart_dma_t* ctrl, UART_HandleTypeDef* huart, uint8_t* dma_buf
     ctrl->lwrb_buf = rb_buf;
     ctrl->lwrb_size = rb_size;
     ctrl->old_pos = 0;
-
+/* (可选) 清空 DMA 数组，方便 debug 时查看数据干净 */
+    memset(dma_buf, 0, dma_size);
     /* 初始化环形缓冲区 */
     lwrb_init(&ctrl->uart_rb, ctrl->lwrb_buf, ctrl->lwrb_size);
 
     /* 开启 DMA 接收 */
     HAL_UART_Receive_DMA(ctrl->huart, ctrl->dma_rx_buf, ctrl->dma_rx_size);
-
+/* 清除可能已经存在的 IDLE 标志位，防止一开启就进中断 */
+    __HAL_UART_CLEAR_IDLEFLAG(ctrl->huart);
     /* 开启空闲中断 */
     __HAL_UART_ENABLE_IT(ctrl->huart, UART_IT_IDLE);
 }

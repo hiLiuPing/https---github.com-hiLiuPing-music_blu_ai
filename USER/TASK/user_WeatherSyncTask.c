@@ -70,7 +70,7 @@ void WeatherSyncTask(void *arg)
             Weather_PowerOn();
             (void)Weather_RunSyncWithRetry("[Weather] first sync success, retry=%u\r\n",
                                            "[Weather] first sync total timeout! Giving up, waiting for shake trigger...\r\n");
-            // Weather_PowerOff();
+            Weather_PowerOff();
 
             g_weather_module.first_sync_done = 1U;
 
@@ -103,7 +103,7 @@ void WeatherSyncTask(void *arg)
                
             }
         }
-        //  Weather_PowerOff();
+         Weather_PowerOff();
 
         g_weather_module.syncing = 0U;
     }

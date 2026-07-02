@@ -69,22 +69,18 @@ void SystemClock_Config(void);
 static void Sleep_DisableStopWakeIrqs(void)
 {
   HAL_NVIC_DisableIRQ(USART1_IRQn);
-  HAL_NVIC_DisableIRQ(USART3_IRQn);
-  HAL_NVIC_DisableIRQ(DMA1_Channel3_IRQn);
-  HAL_NVIC_DisableIRQ(DMA1_Channel4_IRQn);
+  HAL_NVIC_DisableIRQ(USART2_IRQn);
   HAL_NVIC_DisableIRQ(DMA1_Channel5_IRQn);
-  HAL_NVIC_DisableIRQ(I2C2_EV_IRQn);
-  HAL_NVIC_DisableIRQ(I2C2_ER_IRQn);
-  // HAL_NVIC_DisableIRQ(TIM7_IRQn);
+  HAL_NVIC_DisableIRQ(DMA1_Channel6_IRQn);
+  HAL_NVIC_DisableIRQ(I2C1_EV_IRQn);
+  HAL_NVIC_DisableIRQ(I2C1_ER_IRQn);
 
   NVIC_ClearPendingIRQ(USART1_IRQn);
-  NVIC_ClearPendingIRQ(USART3_IRQn);
-  NVIC_ClearPendingIRQ(DMA1_Channel3_IRQn);
-  NVIC_ClearPendingIRQ(DMA1_Channel4_IRQn);
+  NVIC_ClearPendingIRQ(USART2_IRQn);
   NVIC_ClearPendingIRQ(DMA1_Channel5_IRQn);
-  NVIC_ClearPendingIRQ(I2C2_EV_IRQn);
-  NVIC_ClearPendingIRQ(I2C2_ER_IRQn);
-  // NVIC_ClearPendingIRQ(TIM7_IRQn);
+  NVIC_ClearPendingIRQ(DMA1_Channel6_IRQn);
+  NVIC_ClearPendingIRQ(I2C1_EV_IRQn);
+  NVIC_ClearPendingIRQ(I2C1_ER_IRQn);
 }
 
 static void Sleep_EnableRunIrqs(void)
@@ -92,21 +88,17 @@ static void Sleep_EnableRunIrqs(void)
   __HAL_UART_CLEAR_IDLEFLAG(&huart1);
   NVIC_ClearPendingIRQ(USART1_IRQn);
   NVIC_ClearPendingIRQ(USART2_IRQn);
-  NVIC_ClearPendingIRQ(DMA1_Channel3_IRQn);
-  NVIC_ClearPendingIRQ(DMA1_Channel4_IRQn);
   NVIC_ClearPendingIRQ(DMA1_Channel5_IRQn);
-  NVIC_ClearPendingIRQ(I2C2_EV_IRQn);
-  NVIC_ClearPendingIRQ(I2C2_ER_IRQn);
-  // NVIC_ClearPendingIRQ(TIM7_IRQn);
+  NVIC_ClearPendingIRQ(DMA1_Channel6_IRQn);
+  NVIC_ClearPendingIRQ(I2C1_EV_IRQn);
+  NVIC_ClearPendingIRQ(I2C1_ER_IRQn);
   NVIC_ClearPendingIRQ(LPTIM1_IRQn);
   HAL_NVIC_EnableIRQ(USART1_IRQn);
   HAL_NVIC_EnableIRQ(USART2_IRQn);
-  HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
-  HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
   HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
-  HAL_NVIC_EnableIRQ(I2C2_EV_IRQn);
-  HAL_NVIC_EnableIRQ(I2C2_ER_IRQn);
-  // HAL_NVIC_EnableIRQ(TIM7_IRQn);
+  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
+  HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
+  HAL_NVIC_EnableIRQ(I2C1_ER_IRQn);
 }
 
 static uint32_t Sleep_ProcessPendingLptimWake(void)
@@ -231,18 +223,24 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_DMA_Init();
+MX_GPIO_Init();
+  MX_DMA_Init();          // 1. 确保 DMA 总线时钟和全局中断最先开启
+
+  /* ==================== 优先初始化核心串口和通信外设 ==================== */
+  MX_USART1_UART_Init();  // 2. 紧跟 DMA 之后初始化，确保通道和 DMAMUX 映射绝对成功
+  MX_USART2_UART_Init(); 
+
+  /* ==================== 其它外设初始化 ==================== */
   MX_I2C1_Init();
   MX_I2C2_Init();
   MX_QUADSPI_Init();
   MX_SPI1_Init();
-  MX_USART2_UART_Init();
   MX_LPTIM1_Init();
   MX_TIM2_Init();
-  MX_USART1_UART_Init();
   MX_RTC_Init();
+
   /* USER CODE BEGIN 2 */
+  // 在这里面再去调用你的 uart_dma_init(...) 开启 DMA 接收
   User_Tasks_Init();
   vTaskStartScheduler();
   /* USER CODE END 2 */

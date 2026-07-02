@@ -275,13 +275,22 @@ void USART1_IRQHandler(void)
     if(__HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE))
     {
         __HAL_UART_CLEAR_IDLEFLAG(&huart1);
-
-        uart_dma_rx_check(&uart1_admin);   // 搬运DMA数据
-        
+        uart_dma_rx_check(&uart1_admin);
         if(TransmitTaskHandle != NULL) {
             vTaskNotifyGiveFromISR(TransmitTaskHandle, &xHigherPriorityTaskWoken);
         }
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+//         number++;
+// if(number>100000)
+// {
+//     number=0;
+// }
     }
+// numberB++;
+// if(numberB>100000)
+// {
+//     numberB=0;
+// }
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
