@@ -10,6 +10,7 @@
 #include "log.h"
 #include "data_app.h"
 #include "music_app.h"
+#include "music_fft_app.h"
 #include "oled_ui.h"
 
 #include "sensors_app.h"
@@ -143,6 +144,7 @@ void HardwareInitTask(void *argument)
     Time_Init();
     APP_Sensors_Init();
     UserMonitor_Init();
+    MusicFFT_AppInit();
     LPTIM_Start1Hz();
     LPTIM_SetQuoteInterval(300);
     LPTIM_Bulu_Disonnect(600U);

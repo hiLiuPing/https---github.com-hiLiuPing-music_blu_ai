@@ -32,6 +32,7 @@ music_blu_ai/i2c.o: ..\Core\Src\i2c.c ..\Core\Inc\i2c.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_qspi.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_rtc.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_rtc_ex.h \
+  ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_sai.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_spi.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_spi_ex.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_tim.h \

@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "log.h"
+#include "music_fft_app.h"
 Music_Ble_State_t g_music_ble_state = {0};
 
 /*
@@ -27,9 +28,20 @@ const KeyGpioTypeDef key_gpio[KEY_NUM] = {
  */
 void music_send_cmd(MusicCtrlCmd cmd)
 {
+    MusicCtrlCmd stale_cmd;
+
     if (music_cmd_queue != NULL)
     {
-        xQueueSend(music_cmd_queue, &cmd, portMAX_DELAY);
+        if (xQueueSend(music_cmd_queue, &cmd, 0) == pdPASS)
+        {
+            return;
+        }
+
+        (void)xQueueReceive(music_cmd_queue, &stale_cmd, 0);
+        if (xQueueSend(music_cmd_queue, &cmd, 0) != pdPASS)
+        {
+            log_printf("[MusicCmdQ] drop cmd=%d\r\n", (int)cmd);
+        }
     }
 }
 
@@ -140,6 +152,10 @@ void Music_PowerOn(void)
     vTaskDelay(pdMS_TO_TICKS(50));
     HAL_GPIO_WritePin(BULU_PWR_EN_GPIO_Port, BULU_PWR_EN_Pin, GPIO_PIN_SET);
     g_music_ble_state.music_ble_power = 1;
+    if (MusicFFT_Start() != HAL_OK)
+    {
+        log_printf("[MusicFFT] start failed.\r\n");
+    }
 }
 
 /**
@@ -148,6 +164,7 @@ void Music_PowerOn(void)
 void Music_PowerOff(void)
 {
     log_printf("Music_PowerOff\r\n");
+    MusicFFT_Stop();
     HAL_GPIO_WritePin(BULU_PWR_EN_GPIO_Port, BULU_PWR_EN_Pin, GPIO_PIN_RESET);
     vTaskDelay(pdMS_TO_TICKS(50));
     HAL_GPIO_WritePin(AD_PWER_EN_GPIO_Port, AD_PWER_EN_Pin, GPIO_PIN_RESET);

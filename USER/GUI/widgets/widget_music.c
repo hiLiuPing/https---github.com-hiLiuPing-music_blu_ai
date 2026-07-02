@@ -1,4 +1,5 @@
 #include "../ui_widget.h"
+#include "music_fft_app.h"
 
 static uint8_t UI_Widget_MusicTriWave(uint8_t phase, uint8_t period)
 {
@@ -38,28 +39,32 @@ static void UI_Widget_DrawMusicPauseIcon(u8g2_t *u8g2, int16_t x, int16_t y, uin
 
 static void UI_Widget_DrawMusicSpectrum(u8g2_t *u8g2, int16_t x, int16_t y, uint8_t w, uint8_t h)
 {
-    static const uint8_t s_phase_offsets[4] = {0U, 3U, 6U, 9U};
+    uint8_t bars[MUSIC_FFT_BAR_COUNT];
     uint8_t i;
-    uint8_t bar_w = 4U;
-    uint8_t bar_gap = 3U;
-    uint8_t pair_count = 4U;
-    uint8_t total_bars = (uint8_t)(pair_count * 2U);
-    uint8_t total_w = (uint8_t)((total_bars * bar_w) + ((total_bars - 1U) * bar_gap));
+    uint8_t bar_w = 3U;
+    uint8_t bar_gap = 1U;
+    uint8_t total_w = (uint8_t)((MUSIC_FFT_BAR_COUNT * bar_w) + ((MUSIC_FFT_BAR_COUNT - 1U) * bar_gap));
     int16_t start_x = x + (((int16_t)w - total_w) / 2);
-    int16_t baseline_y = y + (int16_t)h - 4;
-    uint8_t min_h = 4U;
-    uint8_t amp_h = 10U;
+    int16_t baseline_y = y + (int16_t)h - 3;
 
-    for (i = 0; i < pair_count; i++)
+    MusicFFT_GetBars(bars);
+
+    for (i = 0U; i < MUSIC_FFT_BAR_COUNT; i++)
     {
-        uint8_t wave = UI_Widget_MusicTriWave((uint8_t)(g_ui_spectrum_tick + s_phase_offsets[i]), 12U);
-        uint8_t bar_h = (uint8_t)(min_h + ((wave * amp_h) / 5U));
-        int16_t left_x = start_x + (int16_t)(i * (bar_w + bar_gap));
-        int16_t right_x = start_x + (int16_t)((total_bars - 1U - i) * (bar_w + bar_gap));
-        int16_t top_y = baseline_y - bar_h;
+        uint8_t bar_h = bars[i];
+        int16_t bar_x = start_x + (int16_t)(i * (bar_w + bar_gap));
 
-        u8g2_DrawRBox(u8g2, left_x, top_y, bar_w, bar_h, 1);
-        u8g2_DrawRBox(u8g2, right_x, top_y, bar_w, bar_h, 1);
+        if (bar_h == 0U)
+        {
+            continue;
+        }
+
+        if (bar_h > (uint8_t)(h - 4U))
+        {
+            bar_h = (uint8_t)(h - 4U);
+        }
+
+        u8g2_DrawRBox(u8g2, bar_x, baseline_y - bar_h, bar_w, bar_h, 1);
     }
 }
 
@@ -72,7 +77,6 @@ void UI_Widget_DrawRegionMusic(u8g2_t *u8g2, int16_t x, int16_t y, uint8_t w, ui
     else
     {
         UI_Widget_DrawMusicPauseIcon(u8g2, x, y, w, h);
+        g_ui_spectrum_tick++;
     }
-
-    g_ui_spectrum_tick++;
 }

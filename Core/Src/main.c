@@ -23,6 +23,7 @@
 #include "lptim.h"
 #include "quadspi.h"
 #include "rtc.h"
+#include "sai.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -39,6 +40,7 @@
 #include "data_app.h"
 #include "led_app.h"
 #include "log.h"
+#include "music_fft_app.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,6 +61,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+static volatile uint8_t s_stop_key_wakeup_latched = 0U;
 
 /* USER CODE END PV */
 
@@ -81,6 +84,21 @@ static void Sleep_DisableStopWakeIrqs(void)
   NVIC_ClearPendingIRQ(DMA1_Channel6_IRQn);
   NVIC_ClearPendingIRQ(I2C1_EV_IRQn);
   NVIC_ClearPendingIRQ(I2C1_ER_IRQn);
+}
+
+static void Sleep_EnableStopKeyWakeIrq(void)
+{
+  s_stop_key_wakeup_latched = 0U;
+  __HAL_GPIO_EXTI_CLEAR_IT(SW_Pin);
+  NVIC_ClearPendingIRQ(EXTI0_IRQn);
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+}
+
+static void Sleep_DisableStopKeyWakeIrq(void)
+{
+  HAL_NVIC_DisableIRQ(EXTI0_IRQn);
+  NVIC_ClearPendingIRQ(EXTI0_IRQn);
 }
 
 static void Sleep_EnableRunIrqs(void)
@@ -234,6 +252,7 @@ int main(void)
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   MX_RTC_Init();
+  MX_SAI1_Init();
   /* USER CODE BEGIN 2 */
   // 在这里面再去调用你的 uart_dma_init(...) 开启 DMA 接收
   User_Tasks_Init();
@@ -352,8 +371,13 @@ static void SystemClock_STOPResume(void)
 
     SystemCoreClock = HAL_RCC_GetSysClockFreq();
 }
-void EXTI2_IRQHandler(void)
+void EXTI0_IRQHandler(void)
 {
+    if ((__HAL_GPIO_EXTI_GET_IT(SW_Pin) != RESET) && (g_ui.sys_running == 0U))
+    {
+        s_stop_key_wakeup_latched = 1U;
+    }
+
     HAL_GPIO_EXTI_IRQHandler(SW_Pin);
     PWR->SCR = PWR_SCR_CWUF;
     (void)PWR->SCR;
@@ -382,13 +406,12 @@ void My_PreSleep_Function(uint32_t *x)
         return;
     }
 
-    if (g_ui.sys_running == 0)
+    if ((g_ui.sys_running == 0) && (MusicFFT_IsRunning() == 0U))
     {
         HAL_SuspendTick();
-        __HAL_GPIO_EXTI_CLEAR_IT(SW_Pin);
         __HAL_GPIO_EXTI_CLEAR_IT(BAT_CHG_Pin);
         __HAL_GPIO_EXTI_CLEAR_IT(POWER_IN_5V_Pin);
-        HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+        Sleep_EnableStopKeyWakeIrq();
         __DSB();
 
         PWR->SCR = PWR_SCR_CWUF;
@@ -403,16 +426,16 @@ void My_PreSleep_Function(uint32_t *x)
 void My_PostSleep_Function(uint32_t x)
 {
     (void)x;
-    if (g_ui.sys_running == 0)
+    if ((g_ui.sys_running == 0) && (MusicFFT_IsRunning() == 0U))
     {
-        uint32_t is_key_wake = (EXTI->PR1 & SW_Pin) != 0U;
+        uint32_t is_key_wake = s_stop_key_wakeup_latched;
         uint32_t is_power_wake = (EXTI->PR1 & (BAT_CHG_Pin | POWER_IN_5V_Pin)) != 0U;
         uint32_t is_lptim_wake = ((EXTI->PR2 & LPTIM_EXTI_LINE_LPTIM1) != 0U) ||
                                  (__HAL_LPTIM_GET_FLAG(&hlptim1, LPTIM_FLAG_ARRM) != RESET);
         SystemClock_STOPResume();
 
-        HAL_NVIC_DisableIRQ(EXTI2_IRQn);
-        NVIC_ClearPendingIRQ(EXTI2_IRQn);
+        Sleep_DisableStopKeyWakeIrq();
+        s_stop_key_wakeup_latched = 0U;
 
         if (is_lptim_wake)
         {

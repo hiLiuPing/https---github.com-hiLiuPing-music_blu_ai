@@ -22,6 +22,7 @@
 // #include "user_PDUFPTask.h"
 #include "user_KeyTask.h"
 #include "user_MusicTask.h"
+#include "user_MusicFFTTask.h"
 // #include "user_MessageTask.h"
 #include "user_LEDTask.h"
 #include "user_OLEDTask.h"
@@ -39,6 +40,7 @@ TaskHandle_t KeyTaskHandle;
 TaskHandle_t KeyManllegeTaskHandle;
 TaskHandle_t LEDTaskHandle;
 TaskHandle_t OLEDTaskHandle;
+TaskHandle_t MusicFFTTaskHandle;
 TaskHandle_t TransmitTaskHandle;
 TaskHandle_t AppDataTaskHandle;
 TaskHandle_t WeatherSyncTaskHandle = NULL;
@@ -113,6 +115,7 @@ void User_Tasks_Init(void)
     xTaskCreate(HardwareInitTask, "HwInitTask", 128 * 10, NULL, tskIDLE_PRIORITY + 5, &HardwareInitTaskHandle);
     xTaskCreate(KeyTask, "KeyTask", 128, NULL, tskIDLE_PRIORITY + 2, &KeyTaskHandle);
     xTaskCreate(MusicTask, "MusicTask", 128, NULL, tskIDLE_PRIORITY + 2, &MusicTaskHandle);
+    xTaskCreate(MusicFFTTask, "MusicFFTTask", 256, NULL, tskIDLE_PRIORITY + 3, &MusicFFTTaskHandle);
     xTaskCreate(LEDTask, "LEDTask", 128, NULL, tskIDLE_PRIORITY + 2, &LEDTaskHandle);
     xTaskCreate(OLEDTask, "OLEDTask", 320, NULL, tskIDLE_PRIORITY + 2, &OLEDTaskHandle);
     xTaskCreate(TransmitTask, "TransmitTask", 512, NULL, tskIDLE_PRIORITY + 2, &TransmitTaskHandle);

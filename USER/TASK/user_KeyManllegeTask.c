@@ -18,6 +18,28 @@
 extern RGB_Object_t rgb;
 
 extern volatile UI_Global_t g_ui;
+
+static void KeyMgr_SendLedEvent(LED_EVT_t evt)
+{
+    LED_EVT_t stale_evt;
+
+    if (LED_cmd_queue == NULL)
+    {
+        return;
+    }
+
+    if (xQueueSend(LED_cmd_queue, &evt, 0) == pdPASS)
+    {
+        return;
+    }
+
+    (void)xQueueReceive(LED_cmd_queue, &stale_evt, 0);
+    if (xQueueSend(LED_cmd_queue, &evt, 0) != pdPASS)
+    {
+        log_printf("[LEDQ] drop evt=%d\r\n", (int)evt);
+    }
+}
+
 static uint8_t s_shutdown_hold_active = 0U;
 /* 宏：向 OLED 队列发送 UI 事件。 */
 #define SEND_UI_EVT(evt) ((void)OLED_UI_PostEvent((evt), "KeyMgr"))
@@ -122,20 +144,13 @@ void KeyManllegeTask(void *pvParameters)
 
                     if (g_music_ble_state.music_played == 0)
                     {
-                        if (LED_cmd_queue != NULL)
-                        {
-                            led_t = LED_EVT_BLINK_GREEN;
-                            xQueueSend(LED_cmd_queue, &led_t, portMAX_DELAY);
-                        }
+                        led_t = LED_EVT_BLINK_GREEN;
+                        KeyMgr_SendLedEvent(led_t);
                     }
                     else
                     {
-
-                        if (LED_cmd_queue != NULL)
-                        {
-                            led_t = LED_EVT_BREATH_GREEN;
-                            xQueueSend(LED_cmd_queue, &led_t, portMAX_DELAY);
-                        }
+                        led_t = LED_EVT_BREATH_GREEN;
+                        KeyMgr_SendLedEvent(led_t);
                     }
                     break;
 
@@ -145,11 +160,8 @@ void KeyManllegeTask(void *pvParameters)
                     {
                         LPTIM_Bulu_Disonnect(600U);
                     }
-                    if (LED_cmd_queue != NULL)
-                    {
-                        led_t = LED_EVT_BLINK_RED;
-                        xQueueSend(LED_cmd_queue, &led_t, portMAX_DELAY);
-                    }
+                    led_t = LED_EVT_BLINK_RED;
+                    KeyMgr_SendLedEvent(led_t);
 
                     break;
 
@@ -163,11 +175,8 @@ void KeyManllegeTask(void *pvParameters)
                     g_music_ble_state.music_ever_played = 1;
                     LPTIM_Music_Play();
                     SEND_UI_EVT(UI_EVT_MUSIC_ON);
-                    if (LED_cmd_queue != NULL)
-                    {
-                        led_t = LED_EVT_BREATH_GREEN;
-                        xQueueSend(LED_cmd_queue, &led_t, portMAX_DELAY);
-                    }
+                    led_t = LED_EVT_BREATH_GREEN;
+                    KeyMgr_SendLedEvent(led_t);
 
                     break;
 
@@ -191,19 +200,13 @@ void KeyManllegeTask(void *pvParameters)
                      */
                     if (g_music_ble_state.ble_connected == 0)
                     {
-                        if (LED_cmd_queue != NULL)
-                        {
-                            led_t = LED_EVT_BLINK_RED;
-                            xQueueSend(LED_cmd_queue, &led_t, portMAX_DELAY);
-                        }
+                        led_t = LED_EVT_BLINK_RED;
+                        KeyMgr_SendLedEvent(led_t);
                         return;
                     }
 
-                    if (LED_cmd_queue != NULL)
-                    {
-                        led_t = LED_EVT_BLINK_GREEN;
-                        xQueueSend(LED_cmd_queue, &led_t, portMAX_DELAY);
-                    }
+                    led_t = LED_EVT_BLINK_GREEN;
+                    KeyMgr_SendLedEvent(led_t);
 
                     break;
 
@@ -214,11 +217,8 @@ void KeyManllegeTask(void *pvParameters)
                         break;
                     }
                     music_send_cmd(CMD_VOL_UP);
-                    if (LED_cmd_queue != NULL)
-                    {
-                        led_t = LED_EVT_HEARTBEAT_GREEN;
-                        xQueueSend(LED_cmd_queue, &led_t, portMAX_DELAY);
-                    }
+                    led_t = LED_EVT_HEARTBEAT_GREEN;
+                    KeyMgr_SendLedEvent(led_t);
 
                     SEND_UI_EVT(UI_EVT_VOL_UP);
                     log_printf("CMD_VOL_UP Button Pressed!\r\n");
@@ -231,11 +231,8 @@ void KeyManllegeTask(void *pvParameters)
                         break;
                     }
                     music_send_cmd(CMD_VOL_DOWN);
-                    if (LED_cmd_queue != NULL)
-                    {
-                        led_t = LED_EVT_HEARTBEAT_GREEN;
-                        xQueueSend(LED_cmd_queue, &led_t, portMAX_DELAY);
-                    }
+                    led_t = LED_EVT_HEARTBEAT_GREEN;
+                    KeyMgr_SendLedEvent(led_t);
                     SEND_UI_EVT(UI_EVT_VOL_DOWN);
                     log_printf("CMD_VOL_DOWN Button Pressed!\r\n");
                     break;
@@ -247,11 +244,8 @@ void KeyManllegeTask(void *pvParameters)
                         break;
                     }
                     music_send_cmd(CMD_PREV);
-                    if (LED_cmd_queue != NULL)
-                    {
-                        led_t = LED_EVT_HEARTBEAT_GREEN;
-                        xQueueSend(LED_cmd_queue, &led_t, portMAX_DELAY);
-                    }
+                    led_t = LED_EVT_HEARTBEAT_GREEN;
+                    KeyMgr_SendLedEvent(led_t);
                     SEND_UI_EVT(UI_EVT_PREV);
                     log_printf("CMD_PREV Button Pressed!\r\n");
                     break;
@@ -263,11 +257,8 @@ void KeyManllegeTask(void *pvParameters)
                         break;
                     }
                     music_send_cmd(CMD_NEXT);
-                    if (LED_cmd_queue != NULL)
-                    {
-                        led_t = LED_EVT_HEARTBEAT_GREEN;
-                        xQueueSend(LED_cmd_queue, &led_t, portMAX_DELAY);
-                    }
+                    led_t = LED_EVT_HEARTBEAT_GREEN;
+                    KeyMgr_SendLedEvent(led_t);
                     SEND_UI_EVT(UI_EVT_NEXT);
                     break;
 

@@ -32,6 +32,7 @@ extern TaskHandle_t KeyTaskHandle;
 extern TaskHandle_t KeyManllegeTaskHandle;
 extern TaskHandle_t LEDTaskHandle;
 extern TaskHandle_t OLEDTaskHandle;
+extern TaskHandle_t MusicFFTTaskHandle;
 extern TaskHandle_t TransmitTaskHandle;
 extern TaskHandle_t AppDataTaskHandle;
 extern TaskHandle_t WeatherSyncTaskHandle;

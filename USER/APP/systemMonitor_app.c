@@ -55,6 +55,44 @@ static uint8_t OLED_UI_IsStateEvent(UI_Event_t evt)
     return (evt == UI_EVT_SHOW_ON || evt == UI_EVT_SLEEP_REQUEST) ? 1U : 0U;
 }
 
+static void OLED_UI_PruneStateEvents(void)
+{
+    UI_Event_t pending[10];
+    UI_Event_t evt;
+    UBaseType_t count;
+    UBaseType_t keep = 0U;
+    UBaseType_t i;
+
+    if (OLED_UI_queue == NULL)
+    {
+        return;
+    }
+
+    count = uxQueueMessagesWaiting(OLED_UI_queue);
+    if (count > (UBaseType_t)(sizeof(pending) / sizeof(pending[0])))
+    {
+        count = (UBaseType_t)(sizeof(pending) / sizeof(pending[0]));
+    }
+
+    for (i = 0U; i < count; i++)
+    {
+        if (xQueueReceive(OLED_UI_queue, &evt, 0) != pdPASS)
+        {
+            break;
+        }
+
+        if (!OLED_UI_IsStateEvent(evt))
+        {
+            pending[keep++] = evt;
+        }
+    }
+
+    for (i = 0U; i < keep; i++)
+    {
+        (void)xQueueSend(OLED_UI_queue, &pending[i], 0);
+    }
+}
+
 uint8_t OLED_UI_PostEvent(UI_Event_t evt, const char *source)
 {
     BaseType_t status;
@@ -97,13 +135,21 @@ uint8_t OLED_UI_PostStateEvent(UI_Event_t evt, const char *source)
         return 0U;
     }
 
-    log_printf("[OLEDQ] reset for %s src=%s\r\n",
+    log_printf("[OLEDQ] compact for %s src=%s\r\n",
                OLED_UI_EventName(evt),
                (source != NULL) ? source : "?");
-    xQueueReset(OLED_UI_queue);
+    OLED_UI_PruneStateEvents();
 
     if (xQueueSend(OLED_UI_queue, &evt, 0) != pdPASS)
     {
+        UI_Event_t dropped_evt;
+
+        if (xQueueReceive(OLED_UI_queue, &dropped_evt, 0) == pdPASS &&
+            xQueueSend(OLED_UI_queue, &evt, 0) == pdPASS)
+        {
+            return 1U;
+        }
+
         log_printf("[OLEDQ] retry fail %s src=%s\r\n",
                    OLED_UI_EventName(evt),
                    (source != NULL) ? source : "?");

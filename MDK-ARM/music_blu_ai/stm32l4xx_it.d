@@ -32,10 +32,22 @@ music_blu_ai/stm32l4xx_it.o: ..\Core\Src\stm32l4xx_it.c \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_qspi.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_rtc.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_rtc_ex.h \
+  ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_sai.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_spi.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_spi_ex.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_tim.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_tim_ex.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_uart.h \
   ..\Drivers\STM32L4xx_HAL_Driver\Inc\stm32l4xx_hal_uart_ex.h \
-  ..\Core\Inc\stm32l4xx_it.h
+  ..\Core\Inc\stm32l4xx_it.h \
+  ..\USER\Middle\FreeRTOS\Source\include\FreeRTOS.h \
+  ..\USER\Middle\FreeRTOS\Source\include\FreeRTOSConfig.h \
+  ..\USER\Middle\FreeRTOS\Source\include\projdefs.h \
+  ..\USER\Middle\FreeRTOS\Source\include\portable.h \
+  ..\USER\Middle\FreeRTOS\Source\include\deprecated_definitions.h \
+  ..\USER\Middle\FreeRTOS\Source\portable\GCC\ARM_CM4F\portmacro.h \
+  ..\USER\Middle\FreeRTOS\Source\include\mpu_wrappers.h \
+  ..\USER\Middle\FreeRTOS\Source\include\task.h \
+  ..\USER\Middle\FreeRTOS\Source\include\list.h \
+  ..\USER\Middle\uart_dma\uart_dma.h ..\USER\Middle\lwrb\lwrb.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\string.h

@@ -28,6 +28,7 @@ virtualFolder:
                 - path: Core/Src/lptim.c
                 - path: Core/Src/quadspi.c
                 - path: Core/Src/rtc.c
+                - path: Core/Src/sai.c
                 - path: Core/Src/spi.c
                 - path: Core/Src/tim.c
                 - path: Core/Src/usart.c
@@ -61,6 +62,8 @@ virtualFolder:
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_qspi.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rtc.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rtc_ex.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sai.c
+            - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sai_ex.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi_ex.c
             - path: Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c
@@ -84,6 +87,7 @@ targets:
         - USE_HAL_DRIVER
         - STM32L431xx
         - HAL_RTOS_ENABLED=1
+        - ARM_MATH_CM4
         - __VFP_FP__
         - LFS_NO_ASSERT
         - __ARMCC_VERSION
@@ -95,27 +99,21 @@ targets:
         - Drivers/CMSIS/Include
         - .cmsis/include
         - MDK-ARM/RTE/_music_blu_ai
+        - USER/APP
+        - USER/BSP
+        - USER/GUI
+        - USER/TASK
+        - USER/Middle/CMSIS-DSP
+        - USER/Middle/CMSIS-DSP/Include
+        - USER/Middle/CMSIS-DSP/PrivateInclude
         - USER/Middle/FreeRTOS/Source/include
         - USER/Middle/FreeRTOS/Source/portable/GCC/ARM_CM4F
-        - USER/TASK
-        - USER/BSP/LOG
-        - USER/Middle/LittleFS
-        - USER/BSP/FLASH
-        - USER/Middle/lwrb
-        - USER/APP
-        - USER/BSP/EE24
-        - USER/BSP/KEY
-        - USER/BSP/LED
-        - USER/BSP/LIS3DH
-        - USER/BSP/QSPI
-        - USER/BSP/SHT40
         - USER/Middle/i2s_bus
+        - USER/Middle/LittleFS
+        - USER/Middle/lwrb
         - USER/Middle/u8g2
-        - USER/Middle/uart_dma
-        - USER/BSP
         - USER
-        - USER/GUI
-        - USER/BSP/MAX17048
+        - USER/Middle/uart_dma
       libList: []
     excludeList: []
     settings:
